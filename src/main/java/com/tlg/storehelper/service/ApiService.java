@@ -1,0 +1,21 @@
+package com.tlg.storehelper.service;
+
+import com.tlg.storehelper.pojo.GoodsBarcodeEntity;
+import com.tlg.storehelper.pojo.SimpleListEntity;
+
+public interface ApiService {
+
+    /////////////////////////////////////////////////////////////
+    ////////////////////       Login     ////////////////////////
+    /////////////////////////////////////////////////////////////
+    public SimpleListEntity<String> loginValidation(String username, String password);
+
+
+    /////////////////////////////////////////////////////////////
+    ////////////////////       Goods     ////////////////////////
+    /////////////////////////////////////////////////////////////
+    public SimpleListEntity<String> getGoodsBarcodeList();
+    public GoodsBarcodeEntity getGoodsBarcodeList(String lastModDate);
+
+
+}
