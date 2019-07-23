@@ -1,6 +1,6 @@
-package com.tlg.storehelper.dao;
+package com.tlg.storehelper.dao.main;
 
-import com.tlg.storehelper.entity.RegentUser;
+import com.tlg.storehelper.entity.main.RegentUser;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;

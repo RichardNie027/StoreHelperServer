@@ -1,9 +1,11 @@
 package com.tlg.storehelper.controller;
 
 import com.tlg.storehelper.pojo.GoodsBarcodeEntity;
+import com.tlg.storehelper.pojo.SimpleEntity;
 import com.tlg.storehelper.pojo.SimpleListEntity;
 import com.tlg.storehelper.pojo.SimpleMapEntity;
 import com.tlg.storehelper.service.ApiService;
+import com.tlg.storehelper.service.BusinessService;
 import oracle.jdbc.proxy.annotation.Post;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -11,14 +13,14 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 public class ApiController {
 
     @Autowired
     private ApiService apiService;
+    @Autowired
+    private BusinessService businessService;
 
     @RequestMapping("/api/getToken")
     public SimpleMapEntity getToken(){
@@ -34,24 +36,20 @@ public class ApiController {
     }
 
     public static class LoginBean {
-        private String username;
-        private String password;
-        public String getUsername() {            return username;        }
-        public void setUsername(String username) {            this.username = username;        }
-        public String getPassword() {            return password;        }
-        public void setPassword(String password) {            this.password = password;        }
-
+        public String username;
+        public String password;
         public LoginBean() {}
     }
 
     @RequestMapping("/api/getGoodsBarcodeList")
-    public SimpleListEntity<String> getGoodsBarcodeList(){
-        return apiService.getGoodsBarcodeList();
+    public SimpleEntity<String> getGoodsBarcodeList(String lastModDate){
+        return apiService.getGoodsBarcodeList(lastModDate);
     }
 
+    /*
     @RequestMapping("/api/getGoodsList")
     public GoodsBarcodeEntity getGoodsBarcodeList(HttpServletRequest request, @RequestParam(value = "lastModDate", required = false) String lastModDate){
-        String baseDateString = "20190101000000";
+        String baseDateString = "20000101000000";
         lastModDate = lastModDate == null || lastModDate.isEmpty() ? baseDateString : lastModDate;
         try {
             new SimpleDateFormat ("yyyyMMddHHmmss").parse(lastModDate);
@@ -59,6 +57,6 @@ public class ApiController {
             lastModDate = baseDateString;
         }
         return apiService.getGoodsBarcodeList(lastModDate);
-    }
+    }*/
 
 }

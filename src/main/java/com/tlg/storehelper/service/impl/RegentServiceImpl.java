@@ -1,10 +1,11 @@
 package com.tlg.storehelper.service.impl;
 
-import com.tlg.storehelper.dao.GoodsBarcodeMapper;
-import com.tlg.storehelper.dao.RegentUserMapper;
-import com.tlg.storehelper.entity.GoodsBarcode;
-import com.tlg.storehelper.entity.RegentUser;
+import com.tlg.storehelper.dao.main.GoodsBarcodeMapper;
+import com.tlg.storehelper.dao.main.RegentUserMapper;
+import com.tlg.storehelper.entity.main.GoodsBarcode;
+import com.tlg.storehelper.entity.main.RegentUser;
 import com.tlg.storehelper.pojo.GoodsBarcodeEntity;
+import com.tlg.storehelper.pojo.SimpleEntity;
 import com.tlg.storehelper.pojo.SimpleListEntity;
 import com.tlg.storehelper.service.RegentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +34,23 @@ public class RegentServiceImpl implements RegentService {
     }
 
     @Override
-    public SimpleListEntity<String> getAllSimpleGoodsBarcodes() {
-        SimpleListEntity<String> entity = new SimpleListEntity();
-        entity.result = goodsBarcodeMapper.selectAllSimpleGoodsBarcodes();
+    public SimpleEntity<String> getAllSimpleGoodsBarcodes(String lastModDate) {
+        SimpleEntity<String> entity = new SimpleEntity();
+        String freshLastModDate = getGoodsBarcodeLastModDate();
+        if(freshLastModDate.compareTo(lastModDate) > 0) {
+            entity.result_list = goodsBarcodeMapper.selectAllSimpleGoodsBarcodes();
+            entity.result_map.put("lastModDate", freshLastModDate);
+        }
         return entity;
     }
 
+    private String getGoodsBarcodeLastModDate() {
+        String lastModDate = goodsBarcodeMapper.selectLastModDate();
+        return lastModDate.trim().equals("") ? "2000-01-01 00:00:00" : lastModDate;
+    }
+
+    /*
+    @Deprecated
     @Override
     public GoodsBarcodeEntity getLastestGoodsBarcodes(String lastModDate) {
         //PropertyUtilsBean bean = new PropertyUtilsBean();
@@ -47,16 +59,16 @@ public class RegentServiceImpl implements RegentService {
         Date maxModDate = new Date(0);
         for(GoodsBarcode goodsBarcode: list) {
             GoodsBarcodeEntity.ResultBean bean = new GoodsBarcodeEntity.ResultBean();
-            bean.id =  goodsBarcode.getId();
-            bean.brand = goodsBarcode.getBrand();
-            bean.goodsNo = goodsBarcode.getGoodsNo();
-            bean.goodsName = goodsBarcode.getGoodsName();
-            bean.sizeDesc = goodsBarcode.getSizeDesc();
-            bean.barcode = goodsBarcode.getBarcode();
-            maxModDate = maxModDate.after(goodsBarcode.getLastModDate()) ? maxModDate : goodsBarcode.getLastModDate();
+            bean.id =  goodsBarcode.id;
+            bean.brand = goodsBarcode.brand;
+            bean.goodsNo = goodsBarcode.goodsNo;
+            bean.goodsName = goodsBarcode.goodsName;
+            bean.sizeDesc = goodsBarcode.sizeDesc;
+            bean.barcode = goodsBarcode.barcode;
+            maxModDate = maxModDate.after(goodsBarcode.lastModDate) ? maxModDate : goodsBarcode.lastModDate;
             entity.result.add(bean);
         }
         entity.lastModDate = new SimpleDateFormat("yyyyMMddHHmmss").format(maxModDate);
         return entity;
-    }
+    }*/
 }

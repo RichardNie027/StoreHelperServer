@@ -1,6 +1,7 @@
 package com.tlg.storehelper.service;
 
 import com.tlg.storehelper.pojo.GoodsBarcodeEntity;
+import com.tlg.storehelper.pojo.SimpleEntity;
 import com.tlg.storehelper.pojo.SimpleListEntity;
 
 public interface ApiService {
@@ -14,8 +15,8 @@ public interface ApiService {
     /////////////////////////////////////////////////////////////
     ////////////////////       Goods     ////////////////////////
     /////////////////////////////////////////////////////////////
-    public SimpleListEntity<String> getGoodsBarcodeList();
-    public GoodsBarcodeEntity getGoodsBarcodeList(String lastModDate);
+    public SimpleEntity<String> getGoodsBarcodeList(String lastModDate);
+    //public GoodsBarcodeEntity getGoodsBarcodeList(String lastModDate);
 
 
 }
