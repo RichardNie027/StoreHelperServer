@@ -10,10 +10,10 @@ public interface InventoryDetailMapper {
     final String TABLE = "StoreHelper.dbo.InventoryDetail";
 
     @Select("SELECT * FROM " + TABLE + " WHERE id=#{id}")
-    public InventoryDetail selectById(long id);
+    InventoryDetail selectById(long id);
 
     @Select("SELECT * FROM " + TABLE + " WHERE pid=#{pid}")
-    public List<InventoryDetail> selectByParentId(long pid);
+    List<InventoryDetail> selectByParentId(long pid);
 
     @Options(useGeneratedKeys = true, keyProperty = "id")
     @Insert("INSERT INTO " + TABLE + " (pid, bin_coding, barcode, quantity) VALUES (#{pid}, #{bin_coding}, #{barcode}, #{quantity})")

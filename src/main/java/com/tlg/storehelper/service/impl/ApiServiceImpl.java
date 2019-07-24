@@ -2,10 +2,9 @@ package com.tlg.storehelper.service.impl;
 
 import com.nec.lib.utils.XxteaUtil;
 import com.tlg.storehelper.entity.main.RegentUser;
-import com.tlg.storehelper.pojo.GoodsBarcodeEntity;
 import com.tlg.storehelper.pojo.SimpleEntity;
-import com.tlg.storehelper.pojo.SimpleListEntity;
 import com.tlg.storehelper.service.ApiService;
+import com.tlg.storehelper.service.BusinessService;
 import com.tlg.storehelper.service.RegentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,10 +14,12 @@ public class ApiServiceImpl implements ApiService {
 
     @Autowired
     private RegentService regentService;
+    @Autowired
+    private BusinessService businessService;
 
     @Override
-    public SimpleListEntity<String> loginValidation(String username, String password) {
-        SimpleListEntity<String> entity = new SimpleListEntity();
+    public SimpleEntity<String> loginValidation(String username, String password) {
+        SimpleEntity<String> entity = new SimpleEntity();
         RegentUser user = null;
         if(username!=null && password!=null) {
             try {
@@ -30,12 +31,14 @@ public class ApiServiceImpl implements ApiService {
         }
         if(user != null && user.password.equals(password)) {
             if(user.type == 2)
-                entity.result.add(user.userAccount);
+                entity.result_list.add(user.userAccount);
             else {
                 for(RegentUser eachUser: regentService.getAllStoreUsers()) {
-                    entity.result.add(eachUser.userAccount);
+                    entity.result_list.add(eachUser.userAccount);
                 }
             }
+            String token = businessService.registerLoginAndGetToken(username);
+            entity.result_map.put("token", token);
             entity.setSuccessfulMessage("登录成功");
         } else {
             entity.code = 1005;

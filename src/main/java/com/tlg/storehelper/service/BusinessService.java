@@ -7,8 +7,15 @@ import java.util.List;
 
 public interface BusinessService {
 
-    public Inventory getInventoryById(long id);
-    public InventoryDetail getInventoryDetailById(long id);
-    public List<InventoryDetail> getInventoryDetailsByParentId(long pid);
+    Inventory getInventoryById(long id);
+    InventoryDetail getInventoryDetailById(long id);
+    List<InventoryDetail> getInventoryDetailsByParentId(long pid);
 
+    String registerLoginAndGetToken(String username);
+    String getToken(String username);
+
+    /**
+     * @return 1:全部通过；-1:用户名无效；-2:令牌无效
+     */
+    int checkUserToken(String username, String token);
 }

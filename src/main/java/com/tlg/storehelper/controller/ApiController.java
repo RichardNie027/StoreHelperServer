@@ -1,18 +1,10 @@
 package com.tlg.storehelper.controller;
 
-import com.tlg.storehelper.pojo.GoodsBarcodeEntity;
 import com.tlg.storehelper.pojo.SimpleEntity;
-import com.tlg.storehelper.pojo.SimpleListEntity;
-import com.tlg.storehelper.pojo.SimpleMapEntity;
 import com.tlg.storehelper.service.ApiService;
 import com.tlg.storehelper.service.BusinessService;
-import oracle.jdbc.proxy.annotation.Post;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 @RestController
 public class ApiController {
@@ -22,16 +14,8 @@ public class ApiController {
     @Autowired
     private BusinessService businessService;
 
-    @RequestMapping("/api/getToken")
-    public SimpleMapEntity getToken(){
-        SimpleMapEntity simpleMapEntity = new SimpleMapEntity();
-        simpleMapEntity.result.put("token", "TianLiGe");
-        simpleMapEntity.setSuccessfulMessage("success");
-        return simpleMapEntity;
-    }
-
-    @RequestMapping(value = "/api/login", method = RequestMethod.POST)
-    public SimpleListEntity<String> loginValidation(@RequestBody LoginBean loginBean){
+    @RequestMapping(value = "/pre_api/login", method = RequestMethod.POST)
+    public SimpleEntity<String> loginValidation(@RequestBody LoginBean loginBean){
         return apiService.loginValidation(loginBean.username, loginBean.password);
     }
 
