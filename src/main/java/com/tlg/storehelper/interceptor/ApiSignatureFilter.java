@@ -12,7 +12,7 @@ public class ApiSignatureFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        System.out.println("------------ ApiSignatureFilter init --------------");
+        System.out.println("------------ ApiSignatureFilter initialization --------------");
     }
 
     @Override
@@ -30,7 +30,7 @@ public class ApiSignatureFilter implements Filter {
 
     @Override
     public void destroy() {
-        System.out.println("------------ ApiSignatureFilter destory --------------");
+        System.out.println("------------ ApiSignatureFilter destroyed --------------");
     }
 
 }

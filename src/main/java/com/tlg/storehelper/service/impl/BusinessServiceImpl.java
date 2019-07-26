@@ -21,6 +21,8 @@ import java.util.Map;
 @Service
 public class BusinessServiceImpl implements BusinessService {
 
+    public static String TokenPrefix = "store_helper_";
+
     public static Map<String, String> loginUsers = new HashMap();
 
     @Autowired
@@ -62,7 +64,9 @@ public class BusinessServiceImpl implements BusinessService {
             loginMgrMapper.insert(loginMgr);
         }
         try {
-            return XxteaUtil.encryptBase64String("store_helper_" + username, "UTF-8", newTokenKey);
+            String token = XxteaUtil.encryptBase64String(TokenPrefix + username, "UTF-8", newTokenKey);
+            loginUsers.put(username, token);
+            return token;
         } catch (Exception e) {}
         return newTokenKey;
     }
@@ -74,7 +78,7 @@ public class BusinessServiceImpl implements BusinessService {
         if(loginMgr != null) {
             tokenKey = loginMgr.token_key;
             try {
-                return XxteaUtil.encryptBase64String("store_helper_" + username, "UTF-8", tokenKey);
+                return XxteaUtil.encryptBase64String(TokenPrefix + username, "UTF-8", tokenKey);
             } catch (Exception e) {}
         }
         return tokenKey;

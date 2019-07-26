@@ -1,5 +1,9 @@
 package com.nec.lib.utils;
 
+import java.math.BigDecimal;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class StringUtil {
 
     public static String left(String source, int length) {
@@ -36,5 +40,50 @@ public class StringUtil {
                 return source.substring(0, i+1);
         }
         return "";
+    }
+
+    public static boolean isNumeric(String str) {
+        // 该正则表达式可以匹配所有的数字 包括负数
+        Pattern pattern = Pattern.compile("-?[0-9]+(\\.[0-9]+)?");
+        String bigStr;
+        try {
+            bigStr = new BigDecimal(str).toString();
+        } catch (Exception e) {
+            return false;//异常 说明包含非数字。
+        }
+
+        Matcher isNum = pattern.matcher(bigStr); // matcher是全匹配
+        if (!isNum.matches()) {
+            return false;
+        }
+        return true;
+    }
+
+    public static int parseInt(String str, int defaultValue) {
+        int result = defaultValue;
+        try {
+            result = Integer.parseInt(str);
+        } catch (NumberFormatException e) {}
+        return result;
+    }
+
+    public static float parseFloat(String str, float defaultValue) {
+        float result = defaultValue;
+        try {
+            result = Float.parseFloat(str);
+        } catch (NumberFormatException e) {}
+        return result;
+    }
+
+    public static double parseDouble(String str, double defaultValue) {
+        double result = defaultValue;
+        try {
+            result = Double.parseDouble(str);
+        } catch (NumberFormatException e) {}
+        return result;
+    }
+
+    public static boolean parseBoolean(String str) {
+        return Boolean.parseBoolean(str);
     }
 }
