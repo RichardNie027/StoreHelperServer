@@ -1,13 +1,15 @@
 package com.tlg.storehelper.entity.second;
 
+import java.util.Date;
+
 public class Inventory {
-    public long id;
+    public String id;
     public String store_code;
-    public String list_date;
+    public Date list_date;
     public int idx;
     public String username;
     public String list_no;
-    public String create_time;
-    public String last_time;
+    public Date create_time;
+    public Date last_time;
 
 }

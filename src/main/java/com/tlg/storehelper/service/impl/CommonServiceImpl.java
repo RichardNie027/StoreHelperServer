@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.tlg.storehelper.pojo.BaseResponseEntity;
 import com.tlg.storehelper.pojo.SimpleMapEntity;
 import com.tlg.storehelper.service.CommonService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.apache.commons.io.FileUtils;
 
@@ -12,6 +14,8 @@ import java.io.*;
 
 @Service
 public class CommonServiceImpl implements CommonService {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
      *  APP版本信息
@@ -36,7 +40,7 @@ public class CommonServiceImpl implements CommonService {
             } catch (IOException e) {
                 entity.code = 801;
                 entity.msg = "无法取得APP版本";
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
             }
         } else {
             entity.code = 801;
@@ -79,7 +83,7 @@ public class CommonServiceImpl implements CommonService {
                 responseEntity.code = 200;
                 responseEntity.msg = "下载成功";
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
                 response.reset();
                 response.setContentType("application/json;charset=UTF-8");
                 responseEntity.code = 500;
@@ -89,14 +93,14 @@ public class CommonServiceImpl implements CommonService {
                     try {
                         bis.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.error(e.getMessage(), e);
                     }
                 }
                 if (fis != null) {
                     try {
                         fis.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.error(e.getMessage(), e);
                     }
                 }
             }

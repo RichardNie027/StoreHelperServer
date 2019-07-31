@@ -1,5 +1,6 @@
 package com.tlg.storehelper.service.impl;
 
+import com.nec.lib.utils.BeanUtil;
 import com.nec.lib.utils.DateUtil;
 import com.nec.lib.utils.XxteaUtil;
 import com.tlg.storehelper.dao.second.InventoryDetailMapper;
@@ -8,8 +9,11 @@ import com.tlg.storehelper.dao.second.LoginMgrMapper;
 import com.tlg.storehelper.entity.second.Inventory;
 import com.tlg.storehelper.entity.second.InventoryDetail;
 import com.tlg.storehelper.entity.second.LoginMgr;
+import com.tlg.storehelper.pojo.InventoryEntity;
 import com.tlg.storehelper.service.BusinessService;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,19 +36,49 @@ public class BusinessServiceImpl implements BusinessService {
     @Autowired
     private LoginMgrMapper loginMgrMapper;
 
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @Override
-    public Inventory getInventoryById(long id) {
+    public Inventory getInventoryById(String id) {
         return inventoryMapper.selectById(id);
     }
 
     @Override
-    public InventoryDetail getInventoryDetailById(long id) {
+    public InventoryDetail getInventoryDetailById(String id) {
         return inventoryDetailMapper.selectById(id);
     }
 
     @Override
-    public List<InventoryDetail> getInventoryDetailsByParentId(long pid) {
+    public List<InventoryDetail> getInventoryDetailsByParentId(String pid) {
         return inventoryDetailMapper.selectByParentId(pid);
+    }
+
+    @Override
+    public String uploadInventory(InventoryEntity inventoryEntity) {
+        if(inventoryMapper.selectById(inventoryEntity.id) != null) {
+            inventoryDetailMapper.deleteByPid(inventoryEntity.id);
+            inventoryMapper.delete(inventoryEntity.id);
+        }
+        try {
+            Inventory inventory = new Inventory();
+            BeanUtil.copyPropertiesExclude(inventoryEntity, inventory, new String[] {"detail"});
+            inventoryMapper.insert(inventory);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return "赋值过程出错";
+        }
+        for(InventoryEntity.DetailBean bean: inventoryEntity.detail) {
+            InventoryDetail inventoryDetail = new InventoryDetail();
+            try {
+                BeanUtil.copyProperties(bean, inventoryDetail);
+                inventoryDetailMapper.insert(inventoryDetail);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                return "赋值过程出错";
+            }
+        }
+        logger.info("上传盘点单完成");
+        return "";
     }
 
     @Override
@@ -67,7 +101,9 @@ public class BusinessServiceImpl implements BusinessService {
             String token = XxteaUtil.encryptBase64String(TokenPrefix + username, "UTF-8", newTokenKey);
             loginUsers.put(username, token);
             return token;
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
         return newTokenKey;
     }
 
@@ -79,7 +115,9 @@ public class BusinessServiceImpl implements BusinessService {
             tokenKey = loginMgr.token_key;
             try {
                 return XxteaUtil.encryptBase64String(TokenPrefix + username, "UTF-8", tokenKey);
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
         }
         return tokenKey;
     }

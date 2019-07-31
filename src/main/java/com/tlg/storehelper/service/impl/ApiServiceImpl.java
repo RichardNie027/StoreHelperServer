@@ -2,6 +2,8 @@ package com.tlg.storehelper.service.impl;
 
 import com.nec.lib.utils.XxteaUtil;
 import com.tlg.storehelper.entity.main.RegentUser;
+import com.tlg.storehelper.pojo.BaseResponseEntity;
+import com.tlg.storehelper.pojo.InventoryEntity;
 import com.tlg.storehelper.pojo.SimpleEntity;
 import com.tlg.storehelper.service.ApiService;
 import com.tlg.storehelper.service.BusinessService;
@@ -56,6 +58,19 @@ public class ApiServiceImpl implements ApiService {
         } else
             entity.setSuccessfulMessage("商品条码取得成功");
 
+        return entity;
+    }
+
+    @Override
+    public BaseResponseEntity uploadInventory(InventoryEntity inventoryEntity) {
+        String result = businessService.uploadInventory(inventoryEntity);
+        BaseResponseEntity entity = new BaseResponseEntity();
+        if(result.equals(""))
+            entity.setSuccessfulMessage("上传成功");
+        else {
+            entity.code = 2005;
+            entity.msg = "盘点单保存失败";
+        }
         return entity;
     }
 

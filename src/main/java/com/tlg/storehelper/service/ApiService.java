@@ -1,5 +1,7 @@
 package com.tlg.storehelper.service;
 
+import com.tlg.storehelper.pojo.BaseResponseEntity;
+import com.tlg.storehelper.pojo.InventoryEntity;
 import com.tlg.storehelper.pojo.SimpleEntity;
 
 public interface ApiService {
@@ -15,6 +17,11 @@ public interface ApiService {
     /////////////////////////////////////////////////////////////
     SimpleEntity<String> getGoodsBarcodeList(String lastModDate);
     //GoodsBarcodeEntity getGoodsBarcodeList(String lastModDate);
+
+    /////////////////////////////////////////////////////////////
+    ////////////////////    Inventory    ////////////////////////
+    /////////////////////////////////////////////////////////////
+    BaseResponseEntity uploadInventory(InventoryEntity inventoryEntity);
 
 
 }

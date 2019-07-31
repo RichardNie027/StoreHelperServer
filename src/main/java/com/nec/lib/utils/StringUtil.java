@@ -1,10 +1,15 @@
 package com.nec.lib.utils;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class StringUtil {
+
+    public static String getUUID() {
+        return UUID.randomUUID().toString().toUpperCase().replaceAll("-", "");
+    }
 
     public static String left(String source, int length) {
         int len = source.length();

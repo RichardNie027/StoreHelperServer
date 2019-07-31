@@ -1,5 +1,7 @@
 package com.tlg.storehelper.controller;
 
+import com.tlg.storehelper.pojo.BaseResponseEntity;
+import com.tlg.storehelper.pojo.InventoryEntity;
 import com.tlg.storehelper.pojo.SimpleEntity;
 import com.tlg.storehelper.service.ApiService;
 import com.tlg.storehelper.service.BusinessService;
@@ -28,6 +30,11 @@ public class ApiController {
     @RequestMapping("/api/getGoodsBarcodeList")
     public SimpleEntity<String> getGoodsBarcodeList(String lastModDate){
         return apiService.getGoodsBarcodeList(lastModDate);
+    }
+
+    @RequestMapping(value = "/api/uploadInventory", method = RequestMethod.POST)
+    public BaseResponseEntity uploadInventory(@RequestBody InventoryEntity inventoryEntity){
+        return apiService.uploadInventory(inventoryEntity);
     }
 
     /*

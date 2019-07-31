@@ -2,6 +2,8 @@ package com.nec.lib.springboot.interceptor;
 
 import com.nec.lib.springboot.exception.CustomException;
 import com.nec.lib.springboot.exception.CustomViewException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,6 +16,9 @@ import java.util.Map;
 
 @ControllerAdvice
 public class CustomExceptionHandler {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
     /**
      * 不管是访问返回视图接口，还是返回json串接口，只要抛出的excetion异常全部由这个方法拦截，并统一返回json串
      * 统一异常拦截 rest接口
@@ -26,14 +31,18 @@ public class CustomExceptionHandler {
         map.put("code", String.valueOf(status.value()));
         map.put("msg", ex.getMessage());
         //这时会返回我们统一的异常json
+        logger.error("错误码：" + status.value() + "，" + ex.getMessage(), ex);
         return map;
     }
     private HttpStatus getStatus(HttpServletRequest request) {
         Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
         if (statusCode == null) {
+            logger.error("HttpStatus.INTERNAL_SERVER_ERROR");
             return HttpStatus.INTERNAL_SERVER_ERROR;
         }
-        return HttpStatus.valueOf(statusCode);
+        HttpStatus httpStatus = HttpStatus.valueOf(statusCode);
+        logger.error(statusCode + httpStatus.toString());
+        return httpStatus;
     }
 
     /**
@@ -45,7 +54,8 @@ public class CustomExceptionHandler {
         HttpStatus status = getStatus(request);
         Map<String,String> map = new HashMap();
         map.put("code", String.valueOf(status.value()));
-        map.put("msg", "customer error msg");
+        map.put("msg", "Custom error msg:" + ex.getMessage());
+        logger.error("错误码：" + status.value() + "，" + "Custom error msg:" + ex.getMessage(), ex);
         return map;
     }
 
@@ -59,7 +69,8 @@ public class CustomExceptionHandler {
         HttpStatus status = getStatus(request);
         Map<String,String> map = new HashMap();
         map.put("code", String.valueOf(status.value()));
-        map.put("msg", "customer error msg");
+        map.put("msg", "Custom error msg:" + ex.getMessage());
+        logger.error("错误码：" + status.value() + "，" + "Custom error msg:" + ex.getMessage(), ex);
         return modelAndView;
     }
 }

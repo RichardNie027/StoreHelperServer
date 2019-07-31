@@ -10,17 +10,20 @@ public interface InventoryDetailMapper {
     final String TABLE = "StoreHelper.dbo.InventoryDetail";
 
     @Select("SELECT * FROM " + TABLE + " WHERE id=#{id}")
-    InventoryDetail selectById(long id);
+    InventoryDetail selectById(String id);
 
     @Select("SELECT * FROM " + TABLE + " WHERE pid=#{pid}")
-    List<InventoryDetail> selectByParentId(long pid);
+    List<InventoryDetail> selectByParentId(String pid);
 
-    @Options(useGeneratedKeys = true, keyProperty = "id")
-    @Insert("INSERT INTO " + TABLE + " (pid, bin_coding, barcode, quantity) VALUES (#{pid}, #{bin_coding}, #{barcode}, #{quantity})")
+    @Options(useGeneratedKeys = false, keyProperty = "id")
+    @Insert("INSERT INTO " + TABLE + " (id, pid, idx, bin_coding, barcode, quantity) VALUES (#{id}, #{pid}, #{idx}, #{bin_coding}, #{barcode}, #{quantity})")
     int insert(InventoryDetail inventoryDetail);
 
     @Delete("DELETE FROM " + TABLE + " WHERE id=#{id}")
-    int delete(Long id);
+    int delete(String id);
+
+    @Delete("DELETE FROM " + TABLE + " WHERE pid=#{pid}")
+    int deleteByPid(String pid);
 
     @Update("UPDATE " + TABLE + " SET pid=#{pid}, bin_coding=#{bin_coding}, barcode=#{barcode}, quantity=#{quantity} WHERE id=#{id}")
     int update(InventoryDetail inventoryDetail);
