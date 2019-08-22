@@ -15,7 +15,7 @@ public class InventoryEntity  implements Serializable {
     /**店编*/
     public String store_code;
     /**盘点日期*/
-    @JsonFormat(pattern = "yyyyMMddHHmmss")
+    @JsonFormat(pattern = "yyyyMMddHHmmss",timezone="GMT+8")
     public Date list_date;
     /**序号*/
     public int idx;
@@ -24,10 +24,10 @@ public class InventoryEntity  implements Serializable {
     /**盘点单号*/
     public String list_no;
     /**创建时间*/
-    @JsonFormat(pattern = "yyyyMMddHHmmss")
+    @JsonFormat(pattern = "yyyyMMddHHmmss",timezone="GMT+8")
     public Date create_time;
     /**修改时间*/
-    @JsonFormat(pattern = "yyyyMMddHHmmss")
+    @JsonFormat(pattern = "yyyyMMddHHmmss",timezone="GMT+8")
     public Date last_time;
 
     public static class DetailBean {

@@ -1,6 +1,7 @@
 package com.tlg.storehelper.service;
 
 import com.tlg.storehelper.pojo.BaseResponseEntity;
+import com.tlg.storehelper.pojo.CollocationEntity;
 import com.tlg.storehelper.pojo.InventoryEntity;
 import com.tlg.storehelper.pojo.SimpleEntity;
 
@@ -22,6 +23,11 @@ public interface ApiService {
     ////////////////////    Inventory    ////////////////////////
     /////////////////////////////////////////////////////////////
     BaseResponseEntity uploadInventory(InventoryEntity inventoryEntity);
+
+    /////////////////////////////////////////////////////////////
+    ///////////////////    Collocation    ///////////////////////
+    /////////////////////////////////////////////////////////////
+    CollocationEntity getCollocation(String goodsNo);
 
 
 }

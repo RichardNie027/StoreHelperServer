@@ -1,8 +1,10 @@
 package com.tlg.storehelper.service.impl;
 
+import com.nec.lib.utils.StringUtil;
 import com.nec.lib.utils.XxteaUtil;
 import com.tlg.storehelper.entity.main.RegentUser;
 import com.tlg.storehelper.pojo.BaseResponseEntity;
+import com.tlg.storehelper.pojo.CollocationEntity;
 import com.tlg.storehelper.pojo.InventoryEntity;
 import com.tlg.storehelper.pojo.SimpleEntity;
 import com.tlg.storehelper.service.ApiService;
@@ -72,6 +74,43 @@ public class ApiServiceImpl implements ApiService {
             entity.msg = "盘点单保存失败";
         }
         return entity;
+    }
+
+    @Override
+    public CollocationEntity getCollocation(String goodsNo) {
+        String[] goodsNos = {"9B81809","9B81812","9B81882","9B81912","9B83506","LC1DK02KPR327U1"};
+        boolean goodsNoIsOk = false;
+        OUTER:
+        for(int i : new int[]{0,1,2,3,4}) {
+            for(String gno: goodsNos) {
+                String truncatedGoodsNo = StringUtil.truncateRight(goodsNo, i);
+                if(truncatedGoodsNo.equalsIgnoreCase(gno)) {
+                    goodsNo = truncatedGoodsNo;
+                    goodsNoIsOk = true;
+                    break OUTER;
+                }
+            }
+        }
+
+        CollocationEntity collocationEntity = new CollocationEntity();
+        if(!goodsNoIsOk) {
+            collocationEntity.setCode(2003);
+            collocationEntity.setMsg("货号/条码不存在");
+            return collocationEntity;
+        }
+        collocationEntity.goodsNo = goodsNo;
+        collocationEntity.goodsName = "测试商品-时尚女衣";
+        collocationEntity.price = 3888;
+        collocationEntity.pic = goodsNo+".jpg";
+        for(int i=0; i<6; i++) {
+            CollocationEntity.DetailBean detailBean = new CollocationEntity.DetailBean();
+            detailBean.goodsNo = goodsNos[i];
+            detailBean.frequency = 30 + i;
+            detailBean.pic = detailBean.goodsNo + ".jpg";
+            collocationEntity.detail.add(detailBean);
+        }
+        collocationEntity.setSuccessfulMessage("搭配获取成功");
+        return collocationEntity;
     }
 
     /*

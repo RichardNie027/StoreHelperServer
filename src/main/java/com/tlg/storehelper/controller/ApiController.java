@@ -1,6 +1,7 @@
 package com.tlg.storehelper.controller;
 
 import com.tlg.storehelper.pojo.BaseResponseEntity;
+import com.tlg.storehelper.pojo.CollocationEntity;
 import com.tlg.storehelper.pojo.InventoryEntity;
 import com.tlg.storehelper.pojo.SimpleEntity;
 import com.tlg.storehelper.service.ApiService;
@@ -35,6 +36,11 @@ public class ApiController {
     @RequestMapping(value = "/api/uploadInventory", method = RequestMethod.POST)
     public BaseResponseEntity uploadInventory(@RequestBody InventoryEntity inventoryEntity){
         return apiService.uploadInventory(inventoryEntity);
+    }
+
+    @RequestMapping("/api/getCollocation")
+    public CollocationEntity getCollocation(String goodsNo){
+        return apiService.getCollocation(goodsNo);
     }
 
     /*

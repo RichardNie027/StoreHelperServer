@@ -47,6 +47,20 @@ public class StringUtil {
         return "";
     }
 
+    public static String truncateLeft(String source, int length) {
+        int len = source.length();
+        if(len <= length)
+            return "";
+        return source.substring(length, len);
+    }
+
+    public static String truncateRight(String source, int length) {
+        int len = source.length();
+        if(len <= length)
+            return "";
+        return source.substring(0, len - length);
+    }
+
     public static boolean isNumeric(String str) {
         // 该正则表达式可以匹配所有的数字 包括负数
         Pattern pattern = Pattern.compile("-?[0-9]+(\\.[0-9]+)?");

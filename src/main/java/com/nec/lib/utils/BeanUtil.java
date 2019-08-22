@@ -160,8 +160,8 @@ public class BeanUtil {
                         }
                     }
                 } else if (value.getClass().isEnum()) {
-                    Method method = value.getClass().getMethod("getCode", null);
-                    Object val = method.invoke(value, null);
+                    Method method = value.getClass().getMethod("getCode", (Class<?>[]) null);
+                    Object val = method.invoke(value, (Object[]) null);
                     map.put(key, String.valueOf(val));
                 } else if (value.getClass().isPrimitive()) {
                     if (value.getClass().getName().equals("int")) {

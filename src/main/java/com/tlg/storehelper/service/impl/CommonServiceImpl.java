@@ -50,7 +50,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     /**
-     * 下载APP APK文件
+     * 下载文件
      * @param response
      * @param downloadFilePath  被下载的文件在服务器中的路径
      * @param fileName  被下载文件的名称

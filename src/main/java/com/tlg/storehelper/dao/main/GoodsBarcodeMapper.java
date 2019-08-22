@@ -5,7 +5,6 @@ import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
-@Deprecated
 public interface GoodsBarcodeMapper {
 
     /** 已废除，改用selectAllSimpleGoodsBarcodes */
@@ -16,6 +15,7 @@ public interface GoodsBarcodeMapper {
             "(SELECT ID,NAME BRAND FROM GoodsCategory WHERE depth=1 AND itemid='4745FD287704476CB37D05025665751B') D " +
             "ON C.STORYCATEGORYID=D.ID " +
             "WHERE A.LASTMODDATE>to_date(#{lastModDate},'yyyymmddhh24miss')")
+    @Deprecated
     public List<GoodsBarcode> selectLastestGoodsBarcodes(String lastModDate);
 
     @Select("SELECT BARCODE FROM REGENTD.GOODSBARCODE ORDER BY BARCODE")
