@@ -105,7 +105,7 @@ public class ApiServiceImpl implements ApiService {
         for(int i=0; i<6; i++) {
             CollocationEntity.DetailBean detailBean = new CollocationEntity.DetailBean();
             detailBean.goodsNo = goodsNos[i];
-            detailBean.frequency = 30 + i;
+            detailBean.frequency = 50 - i*3;
             detailBean.pic = detailBean.goodsNo + ".jpg";
             collocationEntity.detail.add(detailBean);
         }

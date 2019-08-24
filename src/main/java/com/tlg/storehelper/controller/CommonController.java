@@ -36,11 +36,11 @@ public class CommonController {
     }
 
     @RequestMapping(value = "/pre_api/pic/{pic}", method= RequestMethod.GET)
-    private String downloadPic(HttpServletResponse response, @PathVariable String pic) {
-        BaseResponseEntity ret = commonService.downloadFile(response, sPicPath, pic+".jpg");
-        if(ret.code == 200)
-            return null;
-        else
-            return ret.msg;
+    private void downloadPic(HttpServletResponse response, @PathVariable String pic) {
+        BaseResponseEntity ret = commonService.downloadFile(response, sPicPath, pic + ".jpg");
+        if(ret.code != 200) {
+            response.setStatus(404);
+            response.setHeader("msg", ret.msg);
+        }
     }
 }
