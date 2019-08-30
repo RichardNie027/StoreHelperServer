@@ -2,14 +2,14 @@ package com.tlg.storehelper.service.impl;
 
 import com.nec.lib.utils.StringUtil;
 import com.nec.lib.utils.XxteaUtil;
-import com.tlg.storehelper.entity.main.RegentUser;
+import com.tlg.storehelper.entity.main.ErpUser;
 import com.tlg.storehelper.pojo.BaseResponseEntity;
 import com.tlg.storehelper.pojo.CollocationEntity;
 import com.tlg.storehelper.pojo.InventoryEntity;
 import com.tlg.storehelper.pojo.SimpleEntity;
 import com.tlg.storehelper.service.ApiService;
 import com.tlg.storehelper.service.BusinessService;
-import com.tlg.storehelper.service.RegentService;
+import com.tlg.storehelper.service.ErpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,28 +17,30 @@ import org.springframework.stereotype.Service;
 public class ApiServiceImpl implements ApiService {
 
     @Autowired
-    private RegentService regentService;
+    private ErpService erpService;
     @Autowired
     private BusinessService businessService;
 
     @Override
     public SimpleEntity<String> loginValidation(String username, String password) {
         SimpleEntity<String> entity = new SimpleEntity();
-        RegentUser user = null;
+        ErpUser user = null;
         if(username!=null && password!=null) {
             try {
                 password = XxteaUtil.encryptBase64String(password, "UTF-8", "Passwd-Regent");
+                password = "";
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            user = regentService.getUserByAccount(username);
+            user = erpService.getUserByAccount(username);
         }
         if(user != null && user.password.equals(password)) {
             if(user.type == 2)
                 entity.result_list.add(user.userAccount);
             else {
-                for(RegentUser eachUser: regentService.getAllStoreUsers()) {
-                    entity.result_list.add(eachUser.userAccount);
+                for(ErpUser eachUser: erpService.getAllStoreUsers()) {
+                    if(eachUser.userAccount.length() == 3)
+                        entity.result_list.add(eachUser.userAccount);
                 }
             }
             String token = businessService.registerLoginAndGetToken(username);
@@ -53,7 +55,7 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public SimpleEntity<String> getGoodsBarcodeList(String lastModDate) {
-        SimpleEntity<String> entity = regentService.getAllSimpleGoodsBarcodes(lastModDate);
+        SimpleEntity<String> entity = erpService.getAllSimpleGoodsBarcodes(lastModDate);
         if(entity.result_list.size() == 0) {
             entity.code = 200;
             entity.msg = "商品资料已经是最新";
@@ -116,7 +118,7 @@ public class ApiServiceImpl implements ApiService {
     /*
     @Override
     public GoodsBarcodeEntity getGoodsBarcodeList(String lastModDate) {
-        GoodsBarcodeEntity entity = regentService.getLastestGoodsBarcodes(lastModDate);
+        GoodsBarcodeEntity entity = erpService.getLastestGoodsBarcodes(lastModDate);
         entity.setSuccessfulMessage("商品取得成功");
 
         return entity;

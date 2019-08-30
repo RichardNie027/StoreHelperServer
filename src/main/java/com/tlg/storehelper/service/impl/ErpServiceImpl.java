@@ -1,31 +1,31 @@
 package com.tlg.storehelper.service.impl;
 
 import com.tlg.storehelper.dao.main.GoodsBarcodeMapper;
-import com.tlg.storehelper.dao.main.RegentUserMapper;
-import com.tlg.storehelper.entity.main.RegentUser;
+import com.tlg.storehelper.dao.main.ErpUserMapper;
+import com.tlg.storehelper.entity.main.ErpUser;
 import com.tlg.storehelper.pojo.SimpleEntity;
-import com.tlg.storehelper.service.RegentService;
+import com.tlg.storehelper.service.ErpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class RegentServiceImpl implements RegentService {
+public class ErpServiceImpl implements ErpService {
 
     @Autowired
-    private RegentUserMapper regentUserMapper;
+    private ErpUserMapper erpUserMapper;
     @Autowired
     private GoodsBarcodeMapper goodsBarcodeMapper;
 
     @Override
-    public List<RegentUser> getAllStoreUsers() {
-        return regentUserMapper.selectAllStoreUsers();
+    public List<ErpUser> getAllStoreUsers() {
+        return erpUserMapper.selectAllStoreUsers();
     }
 
     @Override
-    public RegentUser getUserByAccount(String userAccount) {
-        return regentUserMapper.selectUserByAccount(userAccount);
+    public ErpUser getUserByAccount(String userAccount) {
+        return erpUserMapper.selectUserByAccount(userAccount);
     }
 
     @Override

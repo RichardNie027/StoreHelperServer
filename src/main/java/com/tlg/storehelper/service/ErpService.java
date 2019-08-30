@@ -1,16 +1,15 @@
 package com.tlg.storehelper.service;
 
-import com.tlg.storehelper.entity.main.RegentUser;
-import com.tlg.storehelper.pojo.GoodsBarcodeEntity;
+import com.tlg.storehelper.entity.main.ErpUser;
 import com.tlg.storehelper.pojo.SimpleEntity;
 
 import java.util.List;
 
-public interface RegentService {
+public interface ErpService {
 
-    public List<RegentUser> getAllStoreUsers();
+    public List<ErpUser> getAllStoreUsers();
 
-    public RegentUser getUserByAccount(String userAccount);
+    public ErpUser getUserByAccount(String userAccount);
 
     public SimpleEntity<String> getAllSimpleGoodsBarcodes(String lastModDate);
 
