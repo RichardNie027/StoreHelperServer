@@ -1,9 +1,6 @@
 package com.tlg.storehelper.service;
 
-import com.tlg.storehelper.pojo.BaseResponseEntity;
-import com.tlg.storehelper.pojo.CollocationEntity;
-import com.tlg.storehelper.pojo.InventoryEntity;
-import com.tlg.storehelper.pojo.SimpleEntity;
+import com.tlg.storehelper.pojo.*;
 
 public interface ApiService {
 
@@ -28,6 +25,11 @@ public interface ApiService {
     ///////////////////    Collocation    ///////////////////////
     /////////////////////////////////////////////////////////////
     CollocationEntity getCollocation(String goodsNo);
+
+    /////////////////////////////////////////////////////////////
+    ///////////////////    BestSelling    ///////////////////////
+    /////////////////////////////////////////////////////////////
+    SimpleListPageEntity<GoodsSimpleVo> getBestSelling(String storeCode, String dimension, int page);
 
 
 }

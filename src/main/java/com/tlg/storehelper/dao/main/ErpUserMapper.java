@@ -14,7 +14,7 @@ public interface ErpUserMapper {
             " UNION " +
             "SELECT codes as userId,codes as userAccount,names as username,'' as password,1 as type,1 as enabled FROM dbo.password WHERE codes like 'CW____' OR codes like 'JJ____'" +
             ") T1 ORDER BY userId")
-    public List<ErpUser> selectAllStoreUsers();
+    List<ErpUser> selectAllStoreUsers();
 
 //    @Select("SELECT userid,useraccount,password,type,enabled FROM regentuser WHERE userid=#{userId}")    //Regent
     @Select("SELECT * FROM (" +
@@ -23,7 +23,7 @@ public interface ErpUserMapper {
             " UNION " +
             "SELECT codes as userId,codes as userAccount,names as username,'' as password,1 as type,1 as enabled FROM dbo.password WHERE codes like 'CW____' OR codes like 'JJ____'" +
             ") T1 WHERE userId=#{userId}")
-    public ErpUser selectUser(String userId);
+    ErpUser selectUser(String userId);
 
 //    @Select("SELECT userid,useraccount,password,type,enabled FROM regentuser WHERE useraccount=#{userAccount}")    //Regent
     @Select("SELECT * FROM (" +
@@ -32,5 +32,5 @@ public interface ErpUserMapper {
             " UNION " +
             "SELECT codes as userId,codes as userAccount,names as username,'' as password,1 as type,1 as enabled FROM dbo.password WHERE codes like 'CW____' OR codes like 'JJ____'" +
             ") T1 WHERE userAccount=#{userAccount}")
-    public ErpUser selectUserByAccount(String userAccount);
+    ErpUser selectUserByAccount(String userAccount);
 }

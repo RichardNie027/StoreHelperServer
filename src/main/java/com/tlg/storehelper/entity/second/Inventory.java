@@ -4,12 +4,12 @@ import java.util.Date;
 
 public class Inventory {
     public String id;
-    public String store_code;
-    public Date list_date;
+    public String storeCode;
+    public Date listDate;
     public int idx;
     public String username;
-    public String list_no;
-    public Date create_time;
-    public Date last_time;
+    public String listNo;
+    public Date createTime;
+    public Date lastTime;
 
 }

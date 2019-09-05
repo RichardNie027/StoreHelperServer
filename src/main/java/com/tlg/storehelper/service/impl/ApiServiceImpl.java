@@ -1,17 +1,18 @@
 package com.tlg.storehelper.service.impl;
 
-import com.nec.lib.utils.StringUtil;
 import com.nec.lib.utils.XxteaUtil;
 import com.tlg.storehelper.entity.main.ErpUser;
-import com.tlg.storehelper.pojo.BaseResponseEntity;
-import com.tlg.storehelper.pojo.CollocationEntity;
-import com.tlg.storehelper.pojo.InventoryEntity;
-import com.tlg.storehelper.pojo.SimpleEntity;
+import com.tlg.storehelper.entity.main.Goods;
+import com.tlg.storehelper.entity.third.BestSelling;
+import com.tlg.storehelper.entity.third.Collocation;
+import com.tlg.storehelper.pojo.*;
 import com.tlg.storehelper.service.ApiService;
 import com.tlg.storehelper.service.BusinessService;
 import com.tlg.storehelper.service.ErpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ApiServiceImpl implements ApiService {
@@ -36,15 +37,15 @@ public class ApiServiceImpl implements ApiService {
         }
         if(user != null && user.password.equals(password)) {
             if(user.type == 2)
-                entity.result_list.add(user.userAccount);
+                entity.resultList.add(user.userAccount);
             else {
                 for(ErpUser eachUser: erpService.getAllStoreUsers()) {
                     if(eachUser.userAccount.length() == 3)
-                        entity.result_list.add(eachUser.userAccount);
+                        entity.resultList.add(eachUser.userAccount);
                 }
             }
             String token = businessService.registerLoginAndGetToken(username);
-            entity.result_map.put("token", token);
+            entity.resultMap.put("token", token);
             entity.setSuccessfulMessage("登录成功");
         } else {
             entity.code = 1005;
@@ -56,7 +57,7 @@ public class ApiServiceImpl implements ApiService {
     @Override
     public SimpleEntity<String> getGoodsBarcodeList(String lastModDate) {
         SimpleEntity<String> entity = erpService.getAllSimpleGoodsBarcodes(lastModDate);
-        if(entity.result_list.size() == 0) {
+        if(entity.resultList.size() == 0) {
             entity.code = 200;
             entity.msg = "商品资料已经是最新";
         } else
@@ -80,39 +81,43 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public CollocationEntity getCollocation(String goodsNo) {
-        String[] goodsNos = {"9B81809","9B81812","9B81882","9B81912","9B83506","LC1DK02KPR327U1"};
-        boolean goodsNoIsOk = false;
-        OUTER:
-        for(int i : new int[]{0,1,2,3,4}) {
-            for(String gno: goodsNos) {
-                String truncatedGoodsNo = StringUtil.truncateRight(goodsNo, i);
-                if(truncatedGoodsNo.equalsIgnoreCase(gno)) {
-                    goodsNo = truncatedGoodsNo;
-                    goodsNoIsOk = true;
-                    break OUTER;
-                }
-            }
-        }
-
+        final String[] stockInfo = new String[]{"无","少","有","多"};
+        Goods goods = erpService.getGoods(goodsNo);
         CollocationEntity collocationEntity = new CollocationEntity();
-        if(!goodsNoIsOk) {
+        if(goods == null) {
             collocationEntity.setCode(2003);
             collocationEntity.setMsg("货号/条码不存在");
             return collocationEntity;
         }
         collocationEntity.goodsNo = goodsNo;
-        collocationEntity.goodsName = "测试商品-时尚女衣";
-        collocationEntity.price = 3888;
-        collocationEntity.pic = goodsNo+".jpg";
-        for(int i=0; i<6; i++) {
+        collocationEntity.goodsName = goods.goodsName;
+        collocationEntity.price = goods.price;
+        collocationEntity.pic = goods.pic;
+
+        List<Collocation> list = erpService.getCollocation(goodsNo);
+        for(Collocation collocation: list) {
             CollocationEntity.DetailBean detailBean = new CollocationEntity.DetailBean();
-            detailBean.goodsNo = goodsNos[i];
-            detailBean.frequency = 50 - i*3;
-            detailBean.pic = detailBean.goodsNo + ".jpg";
+            detailBean.goodsNo = collocation.goodsNo;
+            detailBean.info = "[" + collocation.frequency + "] " + (collocation.stock<4 ? stockInfo[collocation.stock] : "stockInfo[3]");
+            detailBean.frequency = collocation.frequency;
+            detailBean.pic = collocation.pic;
             collocationEntity.detail.add(detailBean);
         }
         collocationEntity.setSuccessfulMessage("搭配获取成功");
         return collocationEntity;
+    }
+
+    @Override
+    public SimpleListPageEntity<GoodsSimpleVo> getBestSelling(String storeCode, String dimension, int page) {
+        int recordCount = erpService.getBestSellingCount(storeCode, dimension);
+        int recordPerPage = 10;
+        SimpleListPageEntity<GoodsSimpleVo> simpleListPageEntity = new SimpleListPageEntity<GoodsSimpleVo>(page, (int)Math.ceil((double)recordCount/recordPerPage), recordPerPage, recordCount);
+        List<BestSelling> list = erpService.getBestSelling(storeCode, dimension, recordPerPage, page);
+        for(BestSelling bestSelling: list) {
+            simpleListPageEntity.result.add(new GoodsSimpleVo(bestSelling.goodsNo, "", bestSelling.price, String.valueOf(bestSelling.quantity), bestSelling.pic));
+        }
+        simpleListPageEntity.setSuccessfulMessage("畅销款获取成功");
+        return simpleListPageEntity;
     }
 
     /*

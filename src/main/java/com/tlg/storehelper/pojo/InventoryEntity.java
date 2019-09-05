@@ -13,22 +13,22 @@ public class InventoryEntity  implements Serializable {
     /**ID，UUID*/
     public String id;
     /**店编*/
-    public String store_code;
+    public String storeCode;
     /**盘点日期*/
     @JsonFormat(pattern = "yyyyMMddHHmmss",timezone="GMT+8")
-    public Date list_date;
+    public Date listDate;
     /**序号*/
     public int idx;
     /**创建用户*/
     public String username;
     /**盘点单号*/
-    public String list_no;
+    public String listNo;
     /**创建时间*/
     @JsonFormat(pattern = "yyyyMMddHHmmss",timezone="GMT+8")
-    public Date create_time;
+    public Date createTime;
     /**修改时间*/
     @JsonFormat(pattern = "yyyyMMddHHmmss",timezone="GMT+8")
-    public Date last_time;
+    public Date lastTime;
 
     public static class DetailBean {
         /**ID，UUID*/
@@ -38,7 +38,7 @@ public class InventoryEntity  implements Serializable {
         /**序号*/
         public int idx;
         /**货架编码*/
-        public String bin_coding;
+        public String binCoding;
         /**商品条码*/
         public String barcode;
         /**数量*/

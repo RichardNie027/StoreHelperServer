@@ -2,7 +2,13 @@ package com.tlg.storehelper.service.impl;
 
 import com.tlg.storehelper.dao.main.GoodsBarcodeMapper;
 import com.tlg.storehelper.dao.main.ErpUserMapper;
+import com.tlg.storehelper.dao.main.GoodsMapper;
+import com.tlg.storehelper.dao.third.BestSellingMapper;
+import com.tlg.storehelper.dao.third.CollocationMapper;
 import com.tlg.storehelper.entity.main.ErpUser;
+import com.tlg.storehelper.entity.main.Goods;
+import com.tlg.storehelper.entity.third.BestSelling;
+import com.tlg.storehelper.entity.third.Collocation;
 import com.tlg.storehelper.pojo.SimpleEntity;
 import com.tlg.storehelper.service.ErpService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +23,12 @@ public class ErpServiceImpl implements ErpService {
     private ErpUserMapper erpUserMapper;
     @Autowired
     private GoodsBarcodeMapper goodsBarcodeMapper;
+    @Autowired
+    private GoodsMapper goodsMapper;
+    @Autowired
+    private CollocationMapper collocationMapper;
+    @Autowired
+    private BestSellingMapper bestSellingMapper;
 
     @Override
     public List<ErpUser> getAllStoreUsers() {
@@ -33,15 +45,45 @@ public class ErpServiceImpl implements ErpService {
         SimpleEntity<String> entity = new SimpleEntity();
         String freshLastModDate = getGoodsBarcodeLastModDate();
         if(freshLastModDate.compareTo(lastModDate) > 0) {
-            entity.result_list = goodsBarcodeMapper.selectAllSimpleGoodsBarcodes();
-            entity.result_map.put("lastModDate", freshLastModDate);
+            entity.resultList = goodsBarcodeMapper.selectAllSimpleGoodsBarcodes(lastModDate.substring(0,8));
+            entity.resultMap.put("lastModDate", freshLastModDate);
         }
         return entity;
     }
 
+    @Override
+    public Goods getGoods(String goodsNo) {
+        return goodsMapper.selectGoods(goodsNo);
+    }
+
+    @Override
+    public String getGoodsPictureName(String goodsNo) {
+        return goodsMapper.selectGoodsPictureName(goodsNo);
+    }
+
+    @Override
+    public List<Goods> getAllGoods() {
+        return goodsMapper.selectAllGoods();
+    }
+
+    @Override
+    public List<Collocation> getCollocation(String goodsNo) {
+        return collocationMapper.selectCollocation(goodsNo);
+    }
+
+    @Override
+    public int getBestSellingCount(String storeCode, String dimension) {
+        return bestSellingMapper.selectBestSellingCount(dimension, storeCode.substring(0,1));
+    }
+
+    @Override
+    public List<BestSelling> getBestSelling(String storeCode, String dimension, int recordPerPage, int page) {
+        return bestSellingMapper.selectBestSelling(dimension, storeCode.substring(0,1), recordPerPage, recordPerPage * page);
+    }
+
     private String getGoodsBarcodeLastModDate() {
         String lastModDate = goodsBarcodeMapper.selectLastModDate();
-        return lastModDate.trim().equals("") ? "2000-01-01 00:00:00" : lastModDate;
+        return lastModDate.trim().equals("") ? "20000101000000" : lastModDate;
     }
 
     /*

@@ -1,4 +1,4 @@
-package datasource;
+package com.tlg.storehelper.conf;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.ibatis.session.SqlSessionFactory;

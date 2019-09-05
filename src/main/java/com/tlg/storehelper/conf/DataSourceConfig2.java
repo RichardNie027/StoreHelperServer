@@ -1,4 +1,4 @@
-package datasource;
+package com.tlg.storehelper.conf;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;

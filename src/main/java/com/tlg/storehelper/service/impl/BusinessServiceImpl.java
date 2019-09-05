@@ -89,14 +89,14 @@ public class BusinessServiceImpl implements BusinessService {
         String loginTime = DateUtil.toStr(new Date());
         LoginMgr loginMgr = loginMgrMapper.selectById(username);
         if(loginMgr != null) {
-            loginMgr.login_time = loginTime;
-            loginMgr.token_key = newTokenKey;
+            loginMgr.loginTime = loginTime;
+            loginMgr.tokenKey = newTokenKey;
             loginMgrMapper.update(loginMgr);
         } else {
             loginMgr = new LoginMgr();
             loginMgr.username = username;
-            loginMgr.login_time = loginTime;
-            loginMgr.token_key = newTokenKey;
+            loginMgr.loginTime = loginTime;
+            loginMgr.tokenKey = newTokenKey;
             loginMgrMapper.insert(loginMgr);
         }
         try {
@@ -114,7 +114,7 @@ public class BusinessServiceImpl implements BusinessService {
         LoginMgr loginMgr = loginMgrMapper.selectById(username);
         String tokenKey = "";
         if(loginMgr != null) {
-            tokenKey = loginMgr.token_key;
+            tokenKey = loginMgr.tokenKey;
             try {
                 return XxteaUtil.encryptBase64String(TokenPrefix + username, "UTF-8", tokenKey);
             } catch (Exception e) {

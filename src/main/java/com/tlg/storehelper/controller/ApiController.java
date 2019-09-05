@@ -1,9 +1,6 @@
 package com.tlg.storehelper.controller;
 
-import com.tlg.storehelper.pojo.BaseResponseEntity;
-import com.tlg.storehelper.pojo.CollocationEntity;
-import com.tlg.storehelper.pojo.InventoryEntity;
-import com.tlg.storehelper.pojo.SimpleEntity;
+import com.tlg.storehelper.pojo.*;
 import com.tlg.storehelper.service.ApiService;
 import com.tlg.storehelper.service.BusinessService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +38,11 @@ public class ApiController {
     @RequestMapping("/api/getCollocation")
     public CollocationEntity getCollocation(String goodsNo){
         return apiService.getCollocation(goodsNo);
+    }
+
+    @RequestMapping("/api/getBestSelling")
+    public SimpleListPageEntity<GoodsSimpleVo> getBestSelling(String storeCode, String dim, int page){
+        return apiService.getBestSelling(storeCode, dim, page);
     }
 
     /*
