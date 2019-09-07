@@ -9,6 +9,7 @@ public class Inventory {
     public int idx;
     public String username;
     public String listNo;
+    public String status;
     public Date createTime;
     public Date lastTime;
 
