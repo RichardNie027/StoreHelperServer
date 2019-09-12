@@ -1,4 +1,4 @@
-package com.tlg.storehelper.dao.second;
+package com.tlg.storehelper.dao.ds2;
 
 import org.apache.ibatis.annotations.Select;
 

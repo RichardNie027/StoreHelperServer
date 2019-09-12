@@ -1,6 +1,6 @@
-package com.tlg.storehelper.dao.third;
+package com.tlg.storehelper.dao.ds3;
 
-import com.tlg.storehelper.entity.third.Collocation;
+import com.tlg.storehelper.entity.ds3.Collocation;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

@@ -18,7 +18,7 @@ public class ApiController {
     private BusinessService businessService;
 
     /**测试POS销售和实时库存POST接受*/
-    @RequestMapping(value = "/pre_api/test", method = RequestMethod.POST)
+    @RequestMapping(value = "/pre_api/uploadPosData", method = RequestMethod.POST)
     public SimpleEntity<String> test(@RequestBody TestBean testBean){
         SimpleEntity<String> se = new SimpleEntity<String>();
         se.setSuccessfulMessage("OK");
@@ -29,7 +29,6 @@ public class ApiController {
         public List<TestBean1> salesList = new ArrayList<>();
         public List<TestBean2> stockList = new ArrayList<>();
     }
-
     public static class TestBean1 {
         public String cusno;
         public String nos;

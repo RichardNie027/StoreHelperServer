@@ -1,6 +1,6 @@
-package com.tlg.storehelper.dao.third;
+package com.tlg.storehelper.dao.ds3;
 
-import com.tlg.storehelper.entity.third.BestSelling;
+import com.tlg.storehelper.entity.ds3.BestSelling;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

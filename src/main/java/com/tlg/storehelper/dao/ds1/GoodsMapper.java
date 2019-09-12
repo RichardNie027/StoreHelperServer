@@ -1,7 +1,6 @@
-package com.tlg.storehelper.dao.main;
+package com.tlg.storehelper.dao.ds1;
 
-import com.tlg.storehelper.entity.main.ErpUser;
-import com.tlg.storehelper.entity.main.Goods;
+import com.tlg.storehelper.entity.ds1.Goods;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;

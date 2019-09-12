@@ -1,9 +1,7 @@
-package com.tlg.storehelper.dao.second;
+package com.tlg.storehelper.dao.ds2;
 
-import com.tlg.storehelper.entity.second.LoginMgr;
+import com.tlg.storehelper.entity.ds2.LoginMgr;
 import org.apache.ibatis.annotations.*;
-
-import java.util.List;
 
 public interface LoginMgrMapper {
 

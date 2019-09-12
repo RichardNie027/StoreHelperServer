@@ -1,4 +1,4 @@
-package com.tlg.storehelper.entity.third;
+package com.tlg.storehelper.entity.ds3;
 
 public class BestSelling {
     public String dim;

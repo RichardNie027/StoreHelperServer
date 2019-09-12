@@ -1,4 +1,4 @@
-package com.tlg.storehelper.entity.main;
+package com.tlg.storehelper.entity.ds1;
 
 import java.util.Date;
 

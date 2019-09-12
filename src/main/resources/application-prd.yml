@@ -1,0 +1,52 @@
+# tomcat
+server:
+  port: 8080
+  servlet:
+    context-path: /storehelper
+  tomcat:
+    uri-encoding: UTF-8
+spring:
+  devtools:
+    restart:
+      enabled: true      #热加载，每次代码有改动就自动重启
+  datasource:
+    ds1:
+      driver-class-name: net.sourceforge.jtds.jdbc.Driver
+      jdbc-url: jdbc:jtds:sybase://192.168.1.11:50000/laiya;charset=CP936
+      username: mis
+      password: ENC(jkjsCejtTMsYq7ccwoB2jIzgjfvz5L/8)
+      max-idle: 10
+      min-idle: 5
+      maxActive: 20
+      initial-size: 5
+      maxWait: 10000
+      minIdle: 1
+    ds2:
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      jdbc-url: jdbc:sqlserver://192.168.1.245;DatabaseName=StoreHelper
+      username: IT
+      password: ENC(7yt8XW5bxviSYm/XWTQNEb0NPh0cqbwz)
+      max-idle: 10
+      min-idle: 5
+      maxActive: 20
+      initial-size: 5
+      maxWait: 10000
+      minIdle: 1
+    ds3:
+      driver-class-name: net.sourceforge.jtds.jdbc.Driver
+      jdbc-url: jdbc:jtds:sqlserver://192.168.1.8:1433;databaseName=OA
+      username: IT
+      password: ENC(7yt8XW5bxviSYm/XWTQNEb0NPh0cqbwz)
+      max-idle: 10
+      min-idle: 5
+      maxActive: 20
+      initial-size: 5
+      maxWait: 10000
+      minIdle: 1
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+jasypt:
+  encryptor:
+    algorithm: PBEWithMD5AndDES
+    password: tlg_it

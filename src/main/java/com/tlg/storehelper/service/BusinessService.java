@@ -1,8 +1,7 @@
 package com.tlg.storehelper.service;
 
-import com.tlg.storehelper.entity.second.Inventory;
-import com.tlg.storehelper.entity.second.InventoryDetail;
-import com.tlg.storehelper.pojo.BaseResponseEntity;
+import com.tlg.storehelper.entity.ds2.Inventory;
+import com.tlg.storehelper.entity.ds2.InventoryDetail;
 import com.tlg.storehelper.pojo.InventoryEntity;
 
 import java.util.List;

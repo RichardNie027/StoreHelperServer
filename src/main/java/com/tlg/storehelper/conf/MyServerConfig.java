@@ -16,12 +16,13 @@ public class MyServerConfig {
         return new WebServerFactoryCustomizer<ConfigurableTomcatWebServerFactory>() {
             @Override
             public void customize(ConfigurableTomcatWebServerFactory factory) {
-                factory.setPort(8080);
-                factory.addConnectorCustomizers(connector -> ((AbstractHttp11Protocol) connector.getProtocolHandler()).setMaxKeepAliveRequests(1),
-                        connector -> ((AbstractHttp11Protocol) connector.getProtocolHandler()).setConnectionTimeout(20000),
-                        connector -> ((AbstractHttp11Protocol) connector.getProtocolHandler()).setMaxThreads(1000),
-                        connector -> ((AbstractHttp11Protocol) connector.getProtocolHandler()).setMaxHttpHeaderSize(81920),
-                        connector -> ((AbstractHttp11Protocol) connector.getProtocolHandler()).setMaxConnections(1000));
+//                factory.setPort(8080);
+                factory.addConnectorCustomizers(connector -> ((AbstractHttp11Protocol) connector.getProtocolHandler()).setMaxKeepAliveRequests(1)
+                        ,connector -> ((AbstractHttp11Protocol) connector.getProtocolHandler()).setConnectionTimeout(20000)
+                        ,connector -> ((AbstractHttp11Protocol) connector.getProtocolHandler()).setMaxThreads(1000)
+                        ,connector -> ((AbstractHttp11Protocol) connector.getProtocolHandler()).setMaxHttpHeaderSize(81920)
+                        ,connector -> ((AbstractHttp11Protocol) connector.getProtocolHandler()).setMaxConnections(1000)
+                );
             }
         };
     }

@@ -1,6 +1,6 @@
-package com.tlg.storehelper.dao.second;
+package com.tlg.storehelper.dao.ds2;
 
-import com.tlg.storehelper.entity.second.InventoryDetail;
+import com.tlg.storehelper.entity.ds2.InventoryDetail;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

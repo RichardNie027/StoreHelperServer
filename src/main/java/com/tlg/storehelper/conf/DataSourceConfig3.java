@@ -16,10 +16,10 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import javax.sql.DataSource;
 
 @Configuration
-@MapperScan(value = "com.tlg.storehelper.dao.third", sqlSessionTemplateRef  = "thirdSqlSessionTemplate")
+@MapperScan(value = "com.tlg.storehelper.dao.ds3", sqlSessionTemplateRef  = "sqlSessionTemplate3")
 public class DataSourceConfig3 {
-    @Bean(name = "thirdDataSource")
-    @ConfigurationProperties(prefix = "spring.datasource.third")
+    @Bean(name = "dataSource3")
+    @ConfigurationProperties(prefix = "spring.datasource.ds3")
     @LiquibaseDataSource
     public DataSource testDataSource() {
         HikariDataSource ds = (HikariDataSource) DataSourceBuilder.create().build();
@@ -27,21 +27,21 @@ public class DataSourceConfig3 {
         return ds;
     }
 
-    @Bean(name = "thirdSqlSessionFactory")
-    public SqlSessionFactory testSqlSessionFactory(@Qualifier("thirdDataSource") DataSource dataSource) throws Exception {
+    @Bean(name = "sqlSessionFactory3")
+    public SqlSessionFactory testSqlSessionFactory(@Qualifier("dataSource3") DataSource dataSource) throws Exception {
         SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
         bean.setDataSource(dataSource);
         return bean.getObject();
     }
 
-    @Bean(name = "thirdTransactionManager")
-    public DataSourceTransactionManager testTransactionManager(@Qualifier("thirdDataSource") DataSource dataSource) {
+    @Bean(name = "transactionManager3")
+    public DataSourceTransactionManager testTransactionManager(@Qualifier("dataSource3") DataSource dataSource) {
         return new DataSourceTransactionManager(dataSource);
     }
 
-    @Bean(name = "thirdSqlSessionTemplate")
+    @Bean(name = "sqlSessionTemplate3")
     //   @Primary
-    public SqlSessionTemplate testSqlSessionTemplate(@Qualifier("thirdSqlSessionFactory") SqlSessionFactory sqlSessionFactory) throws Exception {
+    public SqlSessionTemplate testSqlSessionTemplate(@Qualifier("sqlSessionFactory3") SqlSessionFactory sqlSessionFactory) throws Exception {
         return new SqlSessionTemplate(sqlSessionFactory);
     }
 

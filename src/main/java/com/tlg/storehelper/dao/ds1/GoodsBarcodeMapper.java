@@ -1,6 +1,5 @@
-package com.tlg.storehelper.dao.main;
+package com.tlg.storehelper.dao.ds1;
 
-import com.tlg.storehelper.entity.main.GoodsBarcode;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;

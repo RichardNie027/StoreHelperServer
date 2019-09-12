@@ -1,14 +1,14 @@
 package com.tlg.storehelper.service.impl;
 
-import com.tlg.storehelper.dao.main.GoodsBarcodeMapper;
-import com.tlg.storehelper.dao.main.ErpUserMapper;
-import com.tlg.storehelper.dao.main.GoodsMapper;
-import com.tlg.storehelper.dao.third.BestSellingMapper;
-import com.tlg.storehelper.dao.third.CollocationMapper;
-import com.tlg.storehelper.entity.main.ErpUser;
-import com.tlg.storehelper.entity.main.Goods;
-import com.tlg.storehelper.entity.third.BestSelling;
-import com.tlg.storehelper.entity.third.Collocation;
+import com.tlg.storehelper.dao.ds1.GoodsBarcodeMapper;
+import com.tlg.storehelper.dao.ds1.ErpUserMapper;
+import com.tlg.storehelper.dao.ds1.GoodsMapper;
+import com.tlg.storehelper.dao.ds3.BestSellingMapper;
+import com.tlg.storehelper.dao.ds3.CollocationMapper;
+import com.tlg.storehelper.entity.ds1.ErpUser;
+import com.tlg.storehelper.entity.ds1.Goods;
+import com.tlg.storehelper.entity.ds3.BestSelling;
+import com.tlg.storehelper.entity.ds3.Collocation;
 import com.tlg.storehelper.pojo.SimpleEntity;
 import com.tlg.storehelper.service.ErpService;
 import org.springframework.beans.factory.annotation.Autowired;

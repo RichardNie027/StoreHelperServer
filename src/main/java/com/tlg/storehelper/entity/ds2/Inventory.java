@@ -1,4 +1,4 @@
-package com.tlg.storehelper.entity.second;
+package com.tlg.storehelper.entity.ds2;
 
 import java.util.Date;
 

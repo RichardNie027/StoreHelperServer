@@ -1,0 +1,29 @@
+spring:
+  profiles:
+    active: prd
+  #接口返回对象中的日期格式化
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  resources:
+    #前端访问的静态文件路径中加了一级static目录，所以这边不能用默认的static目录
+    static-locations: classpath:/
+    chain:
+      strategy:
+        content:
+          paths: /**
+          enabled: true
+  jmx:
+    enabled: false    #多个springboot运行在同一个tomcat下
+  thymeleaf:
+    mode: NekoHTML
+    #热部署文件，页面不产生缓存，及时更新
+    cache: false
+    prefix: classpath:/templates
+    suffix: .html
+    encoding: UTF-8
+    enabled: true
+
+# logback
+logging:
+  config: classpath:logback-boot.xml

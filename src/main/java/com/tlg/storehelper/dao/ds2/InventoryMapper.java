@@ -1,6 +1,6 @@
-package com.tlg.storehelper.dao.second;
+package com.tlg.storehelper.dao.ds2;
 
-import com.tlg.storehelper.entity.second.Inventory;
+import com.tlg.storehelper.entity.ds2.Inventory;
 import org.apache.ibatis.annotations.*;
 
 public interface InventoryMapper {

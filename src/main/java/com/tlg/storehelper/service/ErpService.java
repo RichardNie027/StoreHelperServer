@@ -1,9 +1,9 @@
 package com.tlg.storehelper.service;
 
-import com.tlg.storehelper.entity.main.ErpUser;
-import com.tlg.storehelper.entity.main.Goods;
-import com.tlg.storehelper.entity.third.BestSelling;
-import com.tlg.storehelper.entity.third.Collocation;
+import com.tlg.storehelper.entity.ds1.ErpUser;
+import com.tlg.storehelper.entity.ds1.Goods;
+import com.tlg.storehelper.entity.ds3.BestSelling;
+import com.tlg.storehelper.entity.ds3.Collocation;
 import com.tlg.storehelper.pojo.SimpleEntity;
 
 import java.util.List;
