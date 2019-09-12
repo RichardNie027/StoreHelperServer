@@ -1,7 +1,10 @@
 package com.tlg.storehelper.controller;
 
+import com.nec.lib.utils.Base64Util;
+import com.nec.lib.utils.DateUtil;
 import com.tlg.storehelper.pojo.BaseResponseEntity;
 import com.tlg.storehelper.pojo.SimpleMapEntity;
+import com.tlg.storehelper.service.BusinessService;
 import com.tlg.storehelper.service.CommonService;
 import com.tlg.storehelper.service.ErpService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
 
 @RestController
 public class CommonController {
@@ -22,6 +26,23 @@ public class CommonController {
     private CommonService commonService;
     @Autowired
     private ErpService erpService;
+    @Autowired
+    private BusinessService businessService;
+
+    @RequestMapping(value = "/pre_api/dynamicPwd")
+    private BaseResponseEntity storeDynamicPwd(HttpServletResponse response, String storeCode) {
+        String pwd = businessService.getStoreDynamicPwd(storeCode);
+        BaseResponseEntity baseResponseEntity = new BaseResponseEntity();
+        if (pwd != null) {
+            String today = DateUtil.toStr(new Date(), "yyyyMMdd");
+            today = "20170831";
+            baseResponseEntity.setSuccessfulMessage(Base64Util.byteArrayToBase64((pwd + today).getBytes()));
+        } else {
+            baseResponseEntity.code = 404;
+            baseResponseEntity.msg = "";
+        }
+        return baseResponseEntity;
+    }
 
     @RequestMapping(value = "/pre_api/appVersion")
     private SimpleMapEntity storeHelperAppLastestVersion(HttpServletResponse response) {

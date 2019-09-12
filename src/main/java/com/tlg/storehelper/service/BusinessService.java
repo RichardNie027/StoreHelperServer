@@ -15,6 +15,10 @@ public interface BusinessService {
 
     String uploadInventory(InventoryEntity inventoryEntity);
 
+
+    boolean checkUserExist(String jobNumber, String id6);
+    String getStoreDynamicPwd(String storeCode);
+
     String registerLoginAndGetToken(String username);
     String getToken(String username);
 

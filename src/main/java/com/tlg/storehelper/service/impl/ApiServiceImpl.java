@@ -1,5 +1,6 @@
 package com.tlg.storehelper.service.impl;
 
+import com.nec.lib.utils.StringUtil;
 import com.nec.lib.utils.XxteaUtil;
 import com.tlg.storehelper.entity.main.ErpUser;
 import com.tlg.storehelper.entity.main.Goods;
@@ -28,12 +29,27 @@ public class ApiServiceImpl implements ApiService {
         ErpUser user = null;
         if(username!=null && password!=null) {
             try {
-                password = XxteaUtil.encryptBase64String(password, "UTF-8", "Passwd-Regent");
-                password = "";
+                //password = XxteaUtil.encryptBase64String(password, "UTF-8", "Passwd-Regent");
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            user = erpService.getUserByAccount(username);
+            if(username.length() == 6 && StringUtil.isNumeric(username)) {  //员工编号
+                if(businessService.checkUserExist(username, password)) {
+                    user = new ErpUser();
+                    user.userAccount = username;
+                    user.username = username;
+                    user.userId = username;
+                    user.enabled = 1;
+                    user.password = password;
+                    user.type = 1;
+                }
+            } else {  //店铺账号
+                String pwd = businessService.getStoreDynamicPwd(username);
+                if(pwd != null)
+                    user = erpService.getUserByAccount(username);
+                if(user != null)
+                    user.password = pwd;
+            }
         }
         if(user != null && user.password.equals(password)) {
             if(user.type == 2)

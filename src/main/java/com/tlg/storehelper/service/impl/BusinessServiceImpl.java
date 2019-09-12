@@ -6,6 +6,7 @@ import com.nec.lib.utils.XxteaUtil;
 import com.tlg.storehelper.dao.second.InventoryDetailMapper;
 import com.tlg.storehelper.dao.second.InventoryMapper;
 import com.tlg.storehelper.dao.second.LoginMgrMapper;
+import com.tlg.storehelper.dao.second.SimpleMapper;
 import com.tlg.storehelper.entity.second.Inventory;
 import com.tlg.storehelper.entity.second.InventoryDetail;
 import com.tlg.storehelper.entity.second.LoginMgr;
@@ -36,6 +37,8 @@ public class BusinessServiceImpl implements BusinessService {
     private InventoryDetailMapper inventoryDetailMapper;
     @Autowired
     private LoginMgrMapper loginMgrMapper;
+    @Autowired
+    private SimpleMapper simpleMapper;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -82,6 +85,17 @@ public class BusinessServiceImpl implements BusinessService {
         logger.info("上传盘点单完成");
         return "";
     }
+
+    @Override
+    public boolean checkUserExist(String jobNumber, String id6) {
+        return simpleMapper.checkUserExist(jobNumber, id6) > 0;
+    }
+
+    @Override
+    public String getStoreDynamicPwd(String storeCode) {
+        return simpleMapper.selectStoreDynamicPwd(storeCode);
+    }
+
 
     @Override
     public String registerLoginAndGetToken(String username) {

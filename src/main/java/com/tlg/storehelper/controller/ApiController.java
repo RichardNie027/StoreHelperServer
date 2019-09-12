@@ -6,6 +6,9 @@ import com.tlg.storehelper.service.BusinessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 public class ApiController {
 
@@ -13,6 +16,38 @@ public class ApiController {
     private ApiService apiService;
     @Autowired
     private BusinessService businessService;
+
+    /**测试POS销售和实时库存POST接受*/
+    @RequestMapping(value = "/pre_api/test", method = RequestMethod.POST)
+    public SimpleEntity<String> test(@RequestBody TestBean testBean){
+        SimpleEntity<String> se = new SimpleEntity<String>();
+        se.setSuccessfulMessage("OK");
+        return se;
+    }
+
+    public static class TestBean {
+        public List<TestBean1> salesList = new ArrayList<>();
+        public List<TestBean2> stockList = new ArrayList<>();
+    }
+
+    public static class TestBean1 {
+        public String cusno;
+        public String nos;
+        public String names;
+        public String salescode;
+        public String colthno;
+        public String color;
+        public int price;
+        public int proprice;
+        public int nb;
+        public String intime;
+    }
+    public static class TestBean2 {
+        public String dbno;
+        public String colthno;
+        public String color;
+        public int nb;
+    }
 
     @RequestMapping(value = "/pre_api/login", method = RequestMethod.POST)
     public SimpleEntity<String> loginValidation(@RequestBody LoginBean loginBean){
