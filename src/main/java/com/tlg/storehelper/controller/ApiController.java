@@ -6,8 +6,6 @@ import com.tlg.storehelper.service.BusinessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 public class ApiController {
@@ -17,7 +15,8 @@ public class ApiController {
     @Autowired
     private BusinessService businessService;
 
-    /**测试POS销售和实时库存POST接受*/
+    /**
+    //测试POS销售和实时库存POST接受
     @RequestMapping(value = "/pre_api/uploadPosData", method = RequestMethod.POST)
     public SimpleEntity<String> test(@RequestBody TestBean testBean){
         SimpleEntity<String> se = new SimpleEntity<String>();
@@ -47,6 +46,7 @@ public class ApiController {
         public String color;
         public int nb;
     }
+    */
 
     @RequestMapping(value = "/pre_api/login", method = RequestMethod.POST)
     public SimpleEntity<String> loginValidation(@RequestBody LoginBean loginBean){
@@ -77,6 +77,16 @@ public class ApiController {
     @RequestMapping("/api/getBestSelling")
     public SimpleListPageEntity<GoodsSimpleVo> getBestSelling(String storeCode, String dim, int page){
         return apiService.getBestSelling(storeCode, dim, page);
+    }
+
+    @RequestMapping("/api/getStoreStock")
+    public SimpleEntity<StockVo> getStoreStock(String storeCode, String goodsNo){
+        return apiService.getStoreStock(storeCode, goodsNo);
+    }
+
+    @RequestMapping("/api/getMembershipShopHistory")
+    public ShopHistoryEntity getMembershipShopHistory(String membershipId, String storeCode){
+        return apiService.getMembershipShopHistory(membershipId, storeCode);
     }
 
     /*

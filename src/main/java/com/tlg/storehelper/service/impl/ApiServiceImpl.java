@@ -135,6 +135,62 @@ public class ApiServiceImpl implements ApiService {
         return simpleListPageEntity;
     }
 
+    @Override
+    public SimpleEntity<StockVo> getStoreStock(String storeCode, String goodsNo) {
+        SimpleEntity<StockVo> simpleEntity = new SimpleEntity();
+        simpleEntity.resultMap.put("goodsNo", "12345678");
+        simpleEntity.resultMap.put("goodsName", "ABCDEFG");
+
+        StockVo vo1 = new StockVo("M", 20, 5,80);
+        vo1.storeList.add("M04");vo1.storeList.add("M35");vo1.storeList.add("M42");
+        simpleEntity.resultList.add(vo1);
+        StockVo vo2 = new StockVo("XL", 30, 6,90);
+        vo2.storeList.add("M02");vo2.storeList.add("M04");vo2.storeList.add("M42");vo2.storeList.add("M32");vo2.storeList.add("M75");vo2.storeList.add("M32");
+        simpleEntity.resultList.add(vo2);
+        simpleEntity.setSuccessfulMessage("库存获取成功");
+        return simpleEntity;
+    }
+
+    public ShopHistoryEntity getMembershipShopHistory(String membershipId, String storeCode) {
+        ShopHistoryEntity shopHistoryEntity = new ShopHistoryEntity();
+        shopHistoryEntity.membershipCardId = "123456";
+        shopHistoryEntity.name = "张三";
+        shopHistoryEntity.mobile = "19901234567";
+        shopHistoryEntity.yearExpenditure = 16890;
+        shopHistoryEntity.totalExpenditure = 68900;
+        ShopHistoryEntity.ShopVo shopVo = new ShopHistoryEntity.ShopVo();
+        shopVo.shopDate = "2019-01-31";
+        shopVo.SalesListCode = "12344321";
+        shopVo.quantity = 1;
+        shopVo.amount = 5400;
+        shopHistoryEntity.shopList.add(shopVo);
+        shopHistoryEntity.shopList.add(shopVo);
+        shopHistoryEntity.shopList.add(shopVo);
+        shopHistoryEntity.shopList.add(shopVo);
+        shopHistoryEntity.shopList.add(shopVo);
+        shopHistoryEntity.shopList.add(shopVo);
+        shopHistoryEntity.shopList.add(shopVo);
+        shopHistoryEntity.shopList.add(shopVo);
+        shopHistoryEntity.shopList.add(shopVo);
+        shopHistoryEntity.shopList.add(shopVo);
+        shopHistoryEntity.shopList.add(shopVo);
+        shopHistoryEntity.shopList.add(shopVo);
+        shopHistoryEntity.shopList.add(shopVo);
+        ShopHistoryEntity.ShopItemVo shopItemVo = new ShopHistoryEntity.ShopItemVo();
+        shopItemVo.goodsNo = "LCDP04VBY344B11";
+        shopItemVo.size = "XL";
+        shopItemVo.goodsName = "ABCDEFG";
+        shopItemVo.quantity = 1;
+        shopItemVo.price = 6000;
+        shopItemVo.discount = 0.9f;
+        shopItemVo.realPrice = 5400;
+        shopItemVo.amount = 5400;
+        shopItemVo.sales = "张某某";
+        shopVo.shopItemList.add(shopItemVo);
+        shopHistoryEntity.setSuccessfulMessage("会员信息获取成功");
+        return shopHistoryEntity;
+    }
+
     /*
     @Override
     public GoodsBarcodeEntity getGoodsBarcodeList(String lastModDate) {

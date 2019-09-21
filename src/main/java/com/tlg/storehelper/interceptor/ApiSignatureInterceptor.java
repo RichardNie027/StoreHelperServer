@@ -43,7 +43,7 @@ public class ApiSignatureInterceptor implements HandlerInterceptor {
             String apiVersion = httpServletRequest.getHeader("ApiVersion");
             String timestamp = httpServletRequest.getHeader("Timestamp");
             String uid = httpServletRequest.getHeader("Uid");
-            String authorization = httpServletRequest.getHeader("Authorization");
+            String authorization = httpServletRequest.getHeader("Auth");   //Authorization
             String signature = httpServletRequest.getHeader("Signature");
             if(appVersion!=null && StringUtil.isNumeric(appVersion) && StringUtil.parseInt(appVersion,0)>=1)
                 sortedMap.put("AppVersion", appVersion);
@@ -80,7 +80,7 @@ public class ApiSignatureInterceptor implements HandlerInterceptor {
                     return false;
                 default:
                     sortedMap.put("Uid", uid);
-                    sortedMap.put("Authorization", authorization);
+                    sortedMap.put("Auth", authorization);
             }
             if(signature==null || signature.isEmpty()) {
                 responseJson(httpServletResponse, 902, "签名");

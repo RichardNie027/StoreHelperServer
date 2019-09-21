@@ -20,6 +20,8 @@ public interface ErpService {
 
     Goods getGoods(String goodsNo);
 
+    boolean queryGoodsPicture(String goodsNo);
+
     String getGoodsPictureName(String goodsNo);
 
     List<Goods> getAllGoods();

@@ -5,12 +5,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.6.RELEASE</version>
+        <version>2.1.8.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.tlg</groupId>
     <artifactId>storehelper</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0-STOREHELPER</version>
     <!-- 打包类型war，非jar -->
     <packaging>war</packaging>
     <name>storehelper</name>
@@ -54,8 +54,24 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <version>2.1.6.RELEASE</version>
+        </dependency>
+        <!-- redis needs pool2 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+            <version>2.6.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -92,6 +108,12 @@
             <groupId>com.github.ulisesbocchio</groupId>
             <artifactId>jasypt-spring-boot-starter</artifactId>
             <version>2.1.2</version>
+        </dependency>
+        <!-- 自定义模块NecLib  -->
+        <dependency>
+            <groupId>com.nec</groupId>
+            <artifactId>neclib</artifactId>
+            <version>1.0-NECLIB</version>
         </dependency>
     </dependencies>
 

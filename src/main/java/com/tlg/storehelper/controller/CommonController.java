@@ -2,17 +2,21 @@ package com.tlg.storehelper.controller;
 
 import com.nec.lib.utils.Base64Util;
 import com.nec.lib.utils.DateUtil;
+import com.nec.lib.utils.NetUtil;
+import com.nec.lib.utils.RedisUtil;
 import com.tlg.storehelper.pojo.BaseResponseEntity;
 import com.tlg.storehelper.pojo.SimpleMapEntity;
 import com.tlg.storehelper.service.BusinessService;
 import com.tlg.storehelper.service.CommonService;
 import com.tlg.storehelper.service.ErpService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 
@@ -29,14 +33,18 @@ public class CommonController {
     @Autowired
     private BusinessService businessService;
 
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
+
     @RequestMapping(value = "/pre_api/dynamicPwd")
     private BaseResponseEntity storeDynamicPwd(HttpServletResponse response, String storeCode) {
         String pwd = businessService.getStoreDynamicPwd(storeCode);
         BaseResponseEntity baseResponseEntity = new BaseResponseEntity();
         if (pwd != null) {
             String today = DateUtil.toStr(new Date(), "yyyyMMdd");
-            today = "20170831";
-            baseResponseEntity.setSuccessfulMessage(Base64Util.byteArrayToBase64((pwd + today).getBytes()));
+            //today = "20170831";
+            String url4Upload = "http://192.168.1.19:8080/runsaPosApi/uploadPosData";
+            baseResponseEntity.setSuccessfulMessage(Base64Util.byteArrayToBase64((pwd + today + url4Upload).getBytes()));
         } else {
             baseResponseEntity.code = 404;
             baseResponseEntity.msg = "";
@@ -61,22 +69,22 @@ public class CommonController {
 
     @RequestMapping(value = "/pre_api/pic/{goodsNo}", method= RequestMethod.GET)
     private void downloadPic(HttpServletResponse response, @PathVariable String goodsNo) {
-        String picPathName = erpService.getGoodsPictureName(goodsNo);
-        if(picPathName == null) {
-            response.setStatus(404);
-            response.setHeader("msg", "Invalid goodsNo");
-            return;
-        }
-        int lastIdx = picPathName.lastIndexOf("\\");
-        if(lastIdx == -1) {
-            response.setStatus(404);
+        if(erpService.queryGoodsPicture(goodsNo)) {
+            RedisUtil redisUtil = RedisUtil.getInstance(redisTemplate);
+            String picStream = (String)redisUtil.get(goodsNo);
+            if(picStream.isEmpty()) {
+                response.setStatus(1007);
+                response.setHeader("msg", "No Pic");
+            }
+            BaseResponseEntity ret = commonService.downloadFileFromStream(response, picStream, goodsNo);
+            if(ret == null || ret.code != 200) {
+                response.setStatus(404);
+                response.setHeader("msg", ret==null ? "" : ret.msg);
+            }
+        } else {
+            response.setStatus(1007);
             response.setHeader("msg", "No Pic");
             return;
-        }
-        BaseResponseEntity ret = commonService.downloadFile(response, picPathName.substring(0,lastIdx+1), picPathName.substring(lastIdx+1));
-        if(ret.code != 200) {
-            response.setStatus(404);
-            response.setHeader("msg", ret.msg);
         }
     }
 }

@@ -11,4 +11,6 @@ public interface CommonService {
 
     BaseResponseEntity downloadFile(HttpServletResponse response, String downloadFilePath, String fileName);
 
+    BaseResponseEntity downloadFileFromStream(HttpServletResponse response, String base64File, String fileName);
+
 }

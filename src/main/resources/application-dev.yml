@@ -6,12 +6,12 @@ server:
   tomcat:
     uri-encoding: UTF-8
 spring:
-  profiles: prd
+  profiles: dev
   devtools:
     restart:
       enabled: true      #热加载，每次代码有改动就自动重启
   redis:
-    host: 192.168.1.4
+    host: 192.168.1.176
     port: 6379
     database: 0
     timeout: 20000
@@ -74,4 +74,4 @@ jasypt:
     password: tlg_it
 properties:
   erp_service:
-    resource_url: http://192.168.1.4:8080/reshelper/pre_api/query_pic/
+    resource_url: http://192.168.1.176:8081/reshelper/pre_api/query_pic/

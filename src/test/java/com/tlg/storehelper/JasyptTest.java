@@ -17,6 +17,7 @@ public class JasyptTest {
         String plainText;
         plainText = "*Mis2011#";
         plainText = "123458xiao";
+        plainText = "tlgfs";
         String encryptedText = standardPBEStringEncryptor.encrypt(plainText);
         System.out.println(encryptedText);
     }

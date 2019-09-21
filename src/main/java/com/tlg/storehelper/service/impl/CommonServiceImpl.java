@@ -1,6 +1,8 @@
 package com.tlg.storehelper.service.impl;
 
 import com.google.gson.Gson;
+import com.nec.lib.utils.Base64Util;
+import com.nec.lib.utils.FileUtil;
 import com.tlg.storehelper.pojo.BaseResponseEntity;
 import com.tlg.storehelper.pojo.SimpleMapEntity;
 import com.tlg.storehelper.service.CommonService;
@@ -11,6 +13,7 @@ import org.apache.commons.io.FileUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.util.Arrays;
 
 @Service
 public class CommonServiceImpl implements CommonService {
@@ -107,6 +110,35 @@ public class CommonServiceImpl implements CommonService {
         } else {
             responseEntity.code = 404;
             responseEntity.msg = "文件不存在";
+        }
+        return responseEntity;
+    }
+
+    /**
+     * 下载文件
+     * @param response
+     * @param base64File  被下载Base64编码的文件流
+     * @return 200,500
+     */
+    @Override
+    public BaseResponseEntity downloadFileFromStream(HttpServletResponse response, String base64File, String fileName) {
+        BaseResponseEntity responseEntity = new BaseResponseEntity();
+        byte[] bytes = Base64Util.base64ToByteArray(base64File);
+        fileName = fileName + FileUtil.getFileExtension(Arrays.copyOf(bytes,10));
+
+        response.setContentType("application/force-download");  // 设置强制下载不打开
+        response.addHeader("Content-Disposition", "attachment;fileName=" + fileName);
+        response.addIntHeader("Content-Length", new Long(bytes.length).intValue());
+        try {
+            OutputStream outputStream = response.getOutputStream();
+            outputStream.write(bytes);
+            return null;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            response.reset();
+            response.setContentType("application/json;charset=UTF-8");
+            responseEntity.code = 500;
+            responseEntity.msg = "下载失败";
         }
         return responseEntity;
     }
