@@ -89,6 +89,11 @@ public class ApiController {
         return apiService.getMembershipShopHistory(membershipId, storeCode);
     }
 
+    @RequestMapping("/api/getMembershipShopHistoryDetail")
+    public SimpleListPageEntity<ShopHistoryDetailVo> getMembershipShopHistoryDetail(String membershipId, String storeCode, int page){
+        return apiService.getMembershipShopHistoryDetail(membershipId, storeCode, page);
+    }
+
     /*
     @RequestMapping("/api/getGoodsList")
     public GoodsBarcodeEntity getGoodsBarcodeList(HttpServletRequest request, @RequestParam(value = "lastModDate", required = false) String lastModDate){

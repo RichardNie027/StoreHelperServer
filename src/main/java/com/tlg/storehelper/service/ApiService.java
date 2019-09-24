@@ -40,6 +40,7 @@ public interface ApiService {
     ///////////////   Membership Shop History ///////////////////
     /////////////////////////////////////////////////////////////
     ShopHistoryEntity getMembershipShopHistory(String membershipId, String storeCode);
+    SimpleListPageEntity<ShopHistoryDetailVo> getMembershipShopHistoryDetail(String membershipId, String storeCode, int page);
 
 
 }

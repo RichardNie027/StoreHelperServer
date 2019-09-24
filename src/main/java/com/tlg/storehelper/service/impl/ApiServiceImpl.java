@@ -158,37 +158,36 @@ public class ApiServiceImpl implements ApiService {
         shopHistoryEntity.mobile = "19901234567";
         shopHistoryEntity.yearExpenditure = 16890;
         shopHistoryEntity.totalExpenditure = 68900;
-        ShopHistoryEntity.ShopVo shopVo = new ShopHistoryEntity.ShopVo();
-        shopVo.shopDate = "2019-01-31";
-        shopVo.SalesListCode = "12344321";
-        shopVo.quantity = 1;
-        shopVo.amount = 5400;
-        shopHistoryEntity.shopList.add(shopVo);
-        shopHistoryEntity.shopList.add(shopVo);
-        shopHistoryEntity.shopList.add(shopVo);
-        shopHistoryEntity.shopList.add(shopVo);
-        shopHistoryEntity.shopList.add(shopVo);
-        shopHistoryEntity.shopList.add(shopVo);
-        shopHistoryEntity.shopList.add(shopVo);
-        shopHistoryEntity.shopList.add(shopVo);
-        shopHistoryEntity.shopList.add(shopVo);
-        shopHistoryEntity.shopList.add(shopVo);
-        shopHistoryEntity.shopList.add(shopVo);
-        shopHistoryEntity.shopList.add(shopVo);
-        shopHistoryEntity.shopList.add(shopVo);
-        ShopHistoryEntity.ShopItemVo shopItemVo = new ShopHistoryEntity.ShopItemVo();
-        shopItemVo.goodsNo = "LCDP04VBY344B11";
-        shopItemVo.size = "XL";
-        shopItemVo.goodsName = "ABCDEFG";
-        shopItemVo.quantity = 1;
-        shopItemVo.price = 6000;
-        shopItemVo.discount = 0.9f;
-        shopItemVo.realPrice = 5400;
-        shopItemVo.amount = 5400;
-        shopItemVo.sales = "张某某";
-        shopVo.shopItemList.add(shopItemVo);
-        shopHistoryEntity.setSuccessfulMessage("会员信息获取成功");
         return shopHistoryEntity;
+    }
+
+    @Override
+    public SimpleListPageEntity<ShopHistoryDetailVo> getMembershipShopHistoryDetail(String membershipId, String storeCode, int page) {
+        int recordCount = 30;
+        int recordPerPage = 30;
+        SimpleListPageEntity<ShopHistoryDetailVo> simpleListPageEntity = new SimpleListPageEntity<ShopHistoryDetailVo>(page, (int)Math.ceil((double)recordCount/recordPerPage), recordPerPage, recordCount);
+        simpleListPageEntity.setSuccessfulMessage("会员信息获取成功");
+
+        for(int i=1; i<=30; i++) {
+            ShopHistoryDetailVo shopVo = new ShopHistoryDetailVo();
+            shopVo.shopDate = "2019-01-31";
+            shopVo.salesListCode = "20190100"+i;
+            shopVo.quantity = i;
+            shopVo.amount = 5400;
+            simpleListPageEntity.result.add(shopVo);
+            ShopHistoryDetailVo.ShopItemVo shopItemVo = new ShopHistoryDetailVo.ShopItemVo();
+            shopItemVo.goodsNo = "LCDP04VBY344B11";
+            shopItemVo.size = "XL";
+            shopItemVo.goodsName = "ABCDEFG"+i;
+            shopItemVo.quantity = i;
+            shopItemVo.price = 1000*i;
+            shopItemVo.discount = 0.9f;
+            shopItemVo.realPrice = 900*i;
+            shopItemVo.amount = 900*i;
+            shopItemVo.sales = "张某某";
+            shopVo.shopItemList.add(shopItemVo);
+        }
+        return simpleListPageEntity;
     }
 
     /*
