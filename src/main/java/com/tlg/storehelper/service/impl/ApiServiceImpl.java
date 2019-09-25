@@ -158,34 +158,37 @@ public class ApiServiceImpl implements ApiService {
         shopHistoryEntity.mobile = "19901234567";
         shopHistoryEntity.yearExpenditure = 16890;
         shopHistoryEntity.totalExpenditure = 68900;
+        shopHistoryEntity.setSuccessfulMessage("会员信息获取成功");
         return shopHistoryEntity;
     }
 
     @Override
     public SimpleListPageEntity<ShopHistoryDetailVo> getMembershipShopHistoryDetail(String membershipId, String storeCode, int page) {
         int recordCount = 30;
-        int recordPerPage = 30;
+        int recordPerPage = 10;
         SimpleListPageEntity<ShopHistoryDetailVo> simpleListPageEntity = new SimpleListPageEntity<ShopHistoryDetailVo>(page, (int)Math.ceil((double)recordCount/recordPerPage), recordPerPage, recordCount);
         simpleListPageEntity.setSuccessfulMessage("会员信息获取成功");
 
-        for(int i=1; i<=30; i++) {
+        for(int i=page*10+1; i<=(page+1)*10; i++) {
             ShopHistoryDetailVo shopVo = new ShopHistoryDetailVo();
             shopVo.shopDate = "2019-01-31";
             shopVo.salesListCode = "20190100"+i;
             shopVo.quantity = i;
             shopVo.amount = 5400;
             simpleListPageEntity.result.add(shopVo);
-            ShopHistoryDetailVo.ShopItemVo shopItemVo = new ShopHistoryDetailVo.ShopItemVo();
-            shopItemVo.goodsNo = "LCDP04VBY344B11";
-            shopItemVo.size = "XL";
-            shopItemVo.goodsName = "ABCDEFG"+i;
-            shopItemVo.quantity = i;
-            shopItemVo.price = 1000*i;
-            shopItemVo.discount = 0.9f;
-            shopItemVo.realPrice = 900*i;
-            shopItemVo.amount = 900*i;
-            shopItemVo.sales = "张某某";
-            shopVo.shopItemList.add(shopItemVo);
+            for(int j=1; j<=i; j++) {
+                ShopHistoryDetailVo.ShopItemVo shopItemVo = new ShopHistoryDetailVo.ShopItemVo();
+                shopItemVo.goodsNo = "LCDP04VBY344B11";
+                shopItemVo.size = "XL";
+                shopItemVo.goodsName = "时尚外套-" + i + "-" + j;
+                shopItemVo.quantity = j;
+                shopItemVo.price = 1000 * j;
+                shopItemVo.discount = 0.9f;
+                shopItemVo.realPrice = 900 * j;
+                shopItemVo.amount = 900 * j;
+                shopItemVo.sales = "张某某";
+                shopVo.shopItemList.add(shopItemVo);
+            }
         }
         return simpleListPageEntity;
     }
