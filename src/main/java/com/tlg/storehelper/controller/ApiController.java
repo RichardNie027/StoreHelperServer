@@ -1,10 +1,17 @@
 package com.tlg.storehelper.controller;
 
+import com.tlg.storehelper.entity.ds3.RunsaPosSales;
+import com.tlg.storehelper.entity.ds3.RunsaPosStock;
+import com.tlg.storehelper.entity.ds3.RunsaPosTransfer;
 import com.tlg.storehelper.pojo.*;
 import com.tlg.storehelper.service.ApiService;
 import com.tlg.storehelper.service.BusinessService;
+import com.tlg.storehelper.service.ErpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @RestController
@@ -14,53 +21,37 @@ public class ApiController {
     private ApiService apiService;
     @Autowired
     private BusinessService businessService;
+    @Autowired
+    private ErpService erpService;
 
-    /**
-    //测试POS销售和实时库存POST接受
+    //接收浪沙POS销售、实时库存、调拨单
     @RequestMapping(value = "/pre_api/uploadPosData", method = RequestMethod.POST)
-    public SimpleEntity<String> test(@RequestBody TestBean testBean){
-        SimpleEntity<String> se = new SimpleEntity<String>();
-        se.setSuccessfulMessage("OK");
-        return se;
+    public BaseResponseEntity uploadPosData(@RequestBody RunsaPosDataBean dataBean){
+        erpService.saveRunsaPosData(dataBean);
+        BaseResponseEntity entity = new SimpleListMapEntity<String>();
+        entity.setSuccessfulMessage("OK");
+        return entity;
     }
 
-    public static class TestBean {
-        public List<TestBean1> salesList = new ArrayList<>();
-        public List<TestBean2> stockList = new ArrayList<>();
+    public static class RunsaPosDataBean {
+        public List<RunsaPosSales> salesList = new ArrayList<>();
+        public List<RunsaPosStock> stockList = new ArrayList<>();
+        public List<RunsaPosTransfer> transferList = new ArrayList<>();
     }
-    public static class TestBean1 {
-        public String cusno;
-        public String nos;
-        public String names;
-        public String salescode;
-        public String colthno;
-        public String color;
-        public int price;
-        public int proprice;
-        public int nb;
-        public String intime;
-    }
-    public static class TestBean2 {
-        public String dbno;
-        public String colthno;
-        public String color;
-        public int nb;
-    }
-    */
 
     @RequestMapping(value = "/pre_api/login", method = RequestMethod.POST)
-    public SimpleEntity<String> loginValidation(@RequestBody LoginBean loginBean){
+    public SimpleListMapEntity<String> loginValidation(@RequestBody LoginBean loginBean){
         return apiService.loginValidation(loginBean.username, loginBean.password);
     }
 
-    public static class LoginBean {
+    private static class LoginBean {
         public String username;
         public String password;
         public LoginBean() {}
     }
 
     @RequestMapping("/api/getGoodsBarcodeList")
-    public SimpleEntity<String> getGoodsBarcodeList(String lastModDate){
+    public SimpleListMapEntity<String> getGoodsBarcodeList(String lastModDate){
         return apiService.getGoodsBarcodeList(lastModDate);
     }
 
@@ -75,23 +66,23 @@ public class ApiController {
     }
 
     @RequestMapping("/api/getBestSelling")
-    public SimpleListPageEntity<GoodsSimpleVo> getBestSelling(String storeCode, String dim, int page){
+    public SimplePageListEntity<GoodsSimpleVo> getBestSelling(String storeCode, String dim, int page){
         return apiService.getBestSelling(storeCode, dim, page);
     }
 
     @RequestMapping("/api/getStoreStock")
-    public SimpleEntity<StockVo> getStoreStock(String storeCode, String goodsNo){
+    public SimpleListMapEntity<StockVo> getStoreStock(String storeCode, String goodsNo){
         return apiService.getStoreStock(storeCode, goodsNo);
     }
 
-    @RequestMapping("/api/getMembershipShopHistory")
-    public ShopHistoryEntity getMembershipShopHistory(String membershipId, String storeCode){
-        return apiService.getMembershipShopHistory(membershipId, storeCode);
+    @RequestMapping("/api/getMembership")
+    public SimpleListEntity<MembershipVo> getMembership(String membershipId, String storeCode){
+        return apiService.getMembership(membershipId, storeCode);
     }
 
-    @RequestMapping("/api/getMembershipShopHistoryDetail")
-    public SimpleListPageEntity<ShopHistoryDetailVo> getMembershipShopHistoryDetail(String membershipId, String storeCode, int page){
-        return apiService.getMembershipShopHistoryDetail(membershipId, storeCode, page);
+    @RequestMapping("/api/getMembershipShopHistory")
+    public SimplePageListEntity<ShopHistoryVo> getMembershipShopHistory(String membershipId, String storeCode, int page){
+        return apiService.getMembershipShopHistory(membershipId, storeCode, page);
     }
 
     /*

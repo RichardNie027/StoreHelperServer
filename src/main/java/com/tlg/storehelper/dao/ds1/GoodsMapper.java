@@ -16,4 +16,7 @@ public interface GoodsMapper {
     @Select("SELECT top 1 case when left(upper(talka),4)='\\\\OA' then '\\\\192.168.1.8'+substring(talka,5,1000) else '' end AS pic FROM dbo.coloth_t WHERE colthno=#{goodsNo}")
     String selectGoodsPictureName(String goodsNo);
 
+    @Select("SELECT '00-'+gg_no AS size FROM dbo.coloth_t a LEFT JOIN gg b ON a.sizekind=b.sizekind WHERE colthno=#{goodsNo} HAVING '00-'+gg_no IN (select color_nos from coloth where colthno=#{goodsNo}) order by b.gg_print")
+    List<String> selectGoodsSize(String goodsNo);
+
 }

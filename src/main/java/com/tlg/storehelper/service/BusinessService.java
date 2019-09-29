@@ -17,6 +17,7 @@ public interface BusinessService {
 
     boolean checkUserExist(String jobNumber, String id6);
     String getStoreDynamicPwd(String storeCode);
+    String getStoreDynamicPwd(String storeCode, String ip);
 
     String registerLoginAndGetToken(String username);
     String getToken(String username);

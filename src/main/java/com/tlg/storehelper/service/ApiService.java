@@ -7,13 +7,13 @@ public interface ApiService {
     /////////////////////////////////////////////////////////////
     ////////////////////       Login     ////////////////////////
     /////////////////////////////////////////////////////////////
-    SimpleEntity<String> loginValidation(String username, String password);
+    SimpleListMapEntity<String> loginValidation(String username, String password);
 
 
     /////////////////////////////////////////////////////////////
     ////////////////////       Goods     ////////////////////////
     /////////////////////////////////////////////////////////////
-    SimpleEntity<String> getGoodsBarcodeList(String lastModDate);
+    SimpleListMapEntity<String> getGoodsBarcodeList(String lastModDate);
     //GoodsBarcodeEntity getGoodsBarcodeList(String lastModDate);
 
     /////////////////////////////////////////////////////////////
@@ -29,18 +29,18 @@ public interface ApiService {
     /////////////////////////////////////////////////////////////
     ///////////////////    BestSelling    ///////////////////////
     /////////////////////////////////////////////////////////////
-    SimpleListPageEntity<GoodsSimpleVo> getBestSelling(String storeCode, String dimension, int page);
+    SimplePageListEntity<GoodsSimpleVo> getBestSelling(String storeCode, String dimension, int page);
 
     /////////////////////////////////////////////////////////////
     ///////////////////       Stock       ///////////////////////
     /////////////////////////////////////////////////////////////
-    SimpleEntity<StockVo> getStoreStock(String storeCode, String goodsNo);
+    SimpleListMapEntity<StockVo> getStoreStock(String storeCode, String goodsNo);
 
     /////////////////////////////////////////////////////////////
     ///////////////   Membership Shop History ///////////////////
     /////////////////////////////////////////////////////////////
-    ShopHistoryEntity getMembershipShopHistory(String membershipId, String storeCode);
-    SimpleListPageEntity<ShopHistoryDetailVo> getMembershipShopHistoryDetail(String membershipId, String storeCode, int page);
+    SimpleListEntity<MembershipVo> getMembership(String membershipId, String storeCode);
+    SimplePageListEntity<ShopHistoryVo> getMembershipShopHistory(String membershipId, String storeCode, int page);
 
 
 }

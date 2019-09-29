@@ -1,16 +1,15 @@
 package com.tlg.storehelper.pojo;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
 
-public class ShopHistoryEntity extends BaseResponseEntity {
+public class MembershipVo implements Serializable {
     /**卡号*/
     public String membershipCardId;
     /**姓名*/
-    public String name;
+    public String membershipName;
     /**手机号*/
     public String mobile;
-    /**本年消费额*/
+    /**年度消费*/
     public int yearExpenditure;
     /**总消费额*/
     public int totalExpenditure;

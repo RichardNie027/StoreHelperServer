@@ -1,6 +1,7 @@
 package com.tlg.storehelper.dao.ds2;
 
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 public interface SimpleMapper {
 
@@ -9,5 +10,11 @@ public interface SimpleMapper {
 
     @Select("SELECT TOP 1 pwd FROM [StoreHelper].[dbo].[DynamicPwd] WHERE storeCode=#{storeCode}")
     String selectStoreDynamicPwd(String storeCode);
+
+    @Select("SELECT TOP 1 ip FROM [StoreHelper].[dbo].[DynamicPwd] WHERE storeCode=#{storeCode}")
+    String selectStoreIp(String storeCode);
+
+    @Update("UPDATE [StoreHelper].[dbo].[DynamicPwd] SET ip=#{ip} WHERE storeCode=#{storeCode}")
+    int updateStoreDynamicPwd_Ip(String ip, String storeCode);
 
 }

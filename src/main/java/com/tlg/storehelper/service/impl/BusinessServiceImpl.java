@@ -96,6 +96,13 @@ public class BusinessServiceImpl implements BusinessService {
         return simpleMapper.selectStoreDynamicPwd(storeCode);
     }
 
+    @Override
+    public String getStoreDynamicPwd(String storeCode, String ip) {
+        if(ip != null && !ip.isEmpty())
+            simpleMapper.updateStoreDynamicPwd_Ip(ip, storeCode);
+        return simpleMapper.selectStoreDynamicPwd(storeCode);
+    }
+
 
     @Override
     public String registerLoginAndGetToken(String username) {

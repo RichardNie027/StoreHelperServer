@@ -38,8 +38,8 @@ public class CommonServiceImpl implements CommonService {
                 String content= FileUtils.readFileToString(file,"UTF-8");
                 Gson gson = new Gson();
                 entity = gson.fromJson(content, SimpleMapEntity.class);
-                Double versionCode = (Double) entity.result.get("versionCode");
-                entity.result.put("versionCode", versionCode.intValue());
+                Double versionCode = (Double) entity.map.get("versionCode");
+                entity.map.put("versionCode", versionCode.intValue());
             } catch (IOException e) {
                 entity.code = 801;
                 entity.msg = "无法取得APP版本";

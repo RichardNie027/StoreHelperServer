@@ -3,6 +3,7 @@ package com.tlg.storehelper.service.impl;
 import com.nec.lib.utils.StringUtil;
 import com.tlg.storehelper.entity.ds1.ErpUser;
 import com.tlg.storehelper.entity.ds1.Goods;
+import com.tlg.storehelper.entity.ds1.Membership;
 import com.tlg.storehelper.entity.ds3.BestSelling;
 import com.tlg.storehelper.entity.ds3.Collocation;
 import com.tlg.storehelper.pojo.*;
@@ -23,8 +24,8 @@ public class ApiServiceImpl implements ApiService {
     private BusinessService businessService;
 
     @Override
-    public SimpleEntity<String> loginValidation(String username, String password) {
-        SimpleEntity<String> entity = new SimpleEntity();
+    public SimpleListMapEntity<String> loginValidation(String username, String password) {
+        SimpleListMapEntity<String> entity = new SimpleListMapEntity();
         ErpUser user = null;
         if(username!=null && password!=null) {
             try {
@@ -52,15 +53,15 @@ public class ApiServiceImpl implements ApiService {
         }
         if(user != null && user.password.equals(password)) {
             if(user.type == 2)
-                entity.resultList.add(user.userAccount);
+                entity.list.add(user.userAccount);
             else {
                 for(ErpUser eachUser: erpService.getAllStoreUsers()) {
                     if(eachUser.userAccount.length() == 3)
-                        entity.resultList.add(eachUser.userAccount);
+                        entity.list.add(eachUser.userAccount);
                 }
             }
             String token = businessService.registerLoginAndGetToken(username);
-            entity.resultMap.put("token", token);
+            entity.map.put("token", token);
             entity.setSuccessfulMessage("登录成功");
         } else {
             entity.code = 1005;
@@ -70,9 +71,9 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public SimpleEntity<String> getGoodsBarcodeList(String lastModDate) {
-        SimpleEntity<String> entity = erpService.getAllSimpleGoodsBarcodes(lastModDate);
-        if(entity.resultList.size() == 0) {
+    public SimpleListMapEntity<String> getGoodsBarcodeList(String lastModDate) {
+        SimpleListMapEntity<String> entity = erpService.getAllSimpleGoodsBarcodes(lastModDate);
+        if(entity.list.size() == 0) {
             entity.code = 200;
             entity.msg = "商品资料已经是最新";
         } else
@@ -123,74 +124,55 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public SimpleListPageEntity<GoodsSimpleVo> getBestSelling(String storeCode, String dimension, int page) {
+    public SimplePageListEntity<GoodsSimpleVo> getBestSelling(String storeCode, String dimension, int page) {
         int recordCount = erpService.getBestSellingCount(storeCode, dimension);
-        int recordPerPage = 10;
-        SimpleListPageEntity<GoodsSimpleVo> simpleListPageEntity = new SimpleListPageEntity<GoodsSimpleVo>(page, (int)Math.ceil((double)recordCount/recordPerPage), recordPerPage, recordCount);
-        List<BestSelling> list = erpService.getBestSelling(storeCode, dimension, recordPerPage, page);
+        int pageSize = 10;
+        SimplePageListEntity<GoodsSimpleVo> entity = new SimplePageListEntity<GoodsSimpleVo>(page, (int)Math.ceil((double)recordCount/pageSize), pageSize, recordCount);
+        List<BestSelling> list = erpService.getBestSelling(storeCode, dimension, pageSize, page);
         for(BestSelling bestSelling: list) {
-            simpleListPageEntity.result.add(new GoodsSimpleVo(bestSelling.goodsNo, "", bestSelling.price, String.valueOf(bestSelling.quantity), bestSelling.pic));
+            entity.list.add(new GoodsSimpleVo(bestSelling.goodsNo, "", bestSelling.price, String.valueOf(bestSelling.quantity), bestSelling.pic));
         }
-        simpleListPageEntity.setSuccessfulMessage("畅销款获取成功");
-        return simpleListPageEntity;
+        entity.setSuccessfulMessage("畅销款获取成功");
+        return entity;
     }
 
     @Override
-    public SimpleEntity<StockVo> getStoreStock(String storeCode, String goodsNo) {
-        SimpleEntity<StockVo> simpleEntity = new SimpleEntity();
-        simpleEntity.resultMap.put("goodsNo", "12345678");
-        simpleEntity.resultMap.put("goodsName", "ABCDEFG");
+    public SimpleListMapEntity<StockVo> getStoreStock(String storeCode, String goodsNo) {
+        SimpleListMapEntity<StockVo> entity = new SimpleListMapEntity();
+        entity.map.put("goodsNo", goodsNo);
+        Goods goods = erpService.getGoods(goodsNo);
+        if(goods!=null)
+            entity.map.put("goodsName", goods.goodsName);
+        else
+            entity.map.put("goodsName", "");
+        entity.list.addAll(erpService.getRunsaPosStock(storeCode, goodsNo));
 
-        StockVo vo1 = new StockVo("M", 20, 5,80);
-        vo1.storeList.add("M04");vo1.storeList.add("M35");vo1.storeList.add("M42");
-        simpleEntity.resultList.add(vo1);
-        StockVo vo2 = new StockVo("XL", 30, 6,90);
-        vo2.storeList.add("M02");vo2.storeList.add("M04");vo2.storeList.add("M42");vo2.storeList.add("M32");vo2.storeList.add("M75");vo2.storeList.add("M32");
-        simpleEntity.resultList.add(vo2);
-        simpleEntity.setSuccessfulMessage("库存获取成功");
-        return simpleEntity;
+        entity.setSuccessfulMessage("库存获取成功");
+        return entity;
     }
 
-    public ShopHistoryEntity getMembershipShopHistory(String membershipId, String storeCode) {
-        ShopHistoryEntity shopHistoryEntity = new ShopHistoryEntity();
-        shopHistoryEntity.membershipCardId = "123456";
-        shopHistoryEntity.name = "张三";
-        shopHistoryEntity.mobile = "19901234567";
-        shopHistoryEntity.yearExpenditure = 16890;
-        shopHistoryEntity.totalExpenditure = 68900;
-        shopHistoryEntity.setSuccessfulMessage("会员信息获取成功");
-        return shopHistoryEntity;
+    public SimpleListEntity<MembershipVo> getMembership(String membershipId, String storeCode) {
+        SimpleListEntity<MembershipVo> result = new SimpleListEntity();
+        List<MembershipVo> membershipList = erpService.getMembership(membershipId);
+        if(membershipList == null || membershipList.size() == 0) {
+            result.code = 2001;
+            result.msg = "会员未识别";
+            return result;
+        }
+        result.list.addAll(membershipList);
+        result.setSuccessfulMessage("会员信息获取成功");
+        return result;
     }
 
     @Override
-    public SimpleListPageEntity<ShopHistoryDetailVo> getMembershipShopHistoryDetail(String membershipId, String storeCode, int page) {
-        int recordCount = 30;
-        int recordPerPage = 10;
-        SimpleListPageEntity<ShopHistoryDetailVo> simpleListPageEntity = new SimpleListPageEntity<ShopHistoryDetailVo>(page, (int)Math.ceil((double)recordCount/recordPerPage), recordPerPage, recordCount);
-        simpleListPageEntity.setSuccessfulMessage("会员信息获取成功");
-
-        for(int i=page*10+1; i<=(page+1)*10; i++) {
-            ShopHistoryDetailVo shopVo = new ShopHistoryDetailVo();
-            shopVo.shopDate = "2019-01-31";
-            shopVo.salesListCode = "20190100"+i;
-            shopVo.quantity = i;
-            shopVo.amount = 5400;
-            simpleListPageEntity.result.add(shopVo);
-            for(int j=1; j<=i; j++) {
-                ShopHistoryDetailVo.ShopItemVo shopItemVo = new ShopHistoryDetailVo.ShopItemVo();
-                shopItemVo.goodsNo = "LCDP04VBY344B11";
-                shopItemVo.size = "XL";
-                shopItemVo.goodsName = "时尚外套-" + i + "-" + j;
-                shopItemVo.quantity = j;
-                shopItemVo.price = 1000 * j;
-                shopItemVo.discount = 0.9f;
-                shopItemVo.realPrice = 900 * j;
-                shopItemVo.amount = 900 * j;
-                shopItemVo.sales = "张某某";
-                shopVo.shopItemList.add(shopItemVo);
-            }
-        }
-        return simpleListPageEntity;
+    public SimplePageListEntity<ShopHistoryVo> getMembershipShopHistory(String membershipId, String storeCode, int page) {
+        int recordCount = erpService.getShopHistoryCount(membershipId);
+        int pageSize = 10;
+        List<ShopHistoryVo> list = erpService.getShopHistory(membershipId, pageSize, page);
+        SimplePageListEntity<ShopHistoryVo> entity = new SimplePageListEntity<ShopHistoryVo>(page, (int)Math.ceil((double)recordCount/pageSize), pageSize, recordCount);
+        entity.list.addAll(list);
+        entity.setSuccessfulMessage("会员信息获取成功");
+        return entity;
     }
 
     /*

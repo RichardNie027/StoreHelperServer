@@ -1,24 +1,29 @@
 package com.tlg.storehelper.service.impl;
 
 import com.google.gson.Gson;
+import com.nec.lib.utils.BeanUtil;
+import com.nec.lib.utils.DateUtil;
 import com.nec.lib.utils.NetUtil;
-import com.tlg.storehelper.dao.ds1.GoodsBarcodeMapper;
-import com.tlg.storehelper.dao.ds1.ErpUserMapper;
-import com.tlg.storehelper.dao.ds1.GoodsMapper;
-import com.tlg.storehelper.dao.ds3.BestSellingMapper;
-import com.tlg.storehelper.dao.ds3.CollocationMapper;
+import com.tlg.storehelper.controller.ApiController;
+import com.tlg.storehelper.dao.ds1.*;
+import com.tlg.storehelper.dao.ds2.SimpleMapper;
+import com.tlg.storehelper.dao.ds3.*;
 import com.tlg.storehelper.entity.ds1.ErpUser;
 import com.tlg.storehelper.entity.ds1.Goods;
-import com.tlg.storehelper.entity.ds3.BestSelling;
-import com.tlg.storehelper.entity.ds3.Collocation;
-import com.tlg.storehelper.pojo.BaseResponseEntity;
-import com.tlg.storehelper.pojo.SimpleEntity;
+import com.tlg.storehelper.entity.ds1.Membership;
+import com.tlg.storehelper.entity.ds3.*;
+import com.tlg.storehelper.pojo.*;
 import com.tlg.storehelper.service.ErpService;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ErpServiceImpl implements ErpService {
@@ -30,9 +35,23 @@ public class ErpServiceImpl implements ErpService {
     @Autowired
     private GoodsMapper goodsMapper;
     @Autowired
+    private MembershipMapper membershipMapper;
+    @Autowired
+    private ShopHistoryMapper shopHistoryMapper;
+    @Autowired
     private CollocationMapper collocationMapper;
     @Autowired
     private BestSellingMapper bestSellingMapper;
+    @Autowired
+    private ErpSimpleMapper erpSimpleMapper;
+    @Autowired
+    private SimpleMapper simpleMapper;
+    @Autowired
+    private RunsaPosSalesMapper runsaPosSalesMapper;
+    @Autowired
+    private RunsaPosStockMapper runsaPosStockMapper;
+    @Autowired
+    private RunsaPosTransferMapper runsaPosTransferMapper;
 
     @Value("${properties.erp_service.resource_url}")
     private String ResourceUrl;
@@ -48,12 +67,12 @@ public class ErpServiceImpl implements ErpService {
     }
 
     @Override
-    public SimpleEntity<String> getAllSimpleGoodsBarcodes(String lastModDate) {
-        SimpleEntity<String> entity = new SimpleEntity();
+    public SimpleListMapEntity<String> getAllSimpleGoodsBarcodes(String lastModDate) {
+        SimpleListMapEntity<String> entity = new SimpleListMapEntity();
         String freshLastModDate = getGoodsBarcodeLastModDate();
         if(freshLastModDate.compareTo(lastModDate) > 0) {
-            entity.resultList = goodsBarcodeMapper.selectAllSimpleGoodsBarcodes(lastModDate.substring(0,8));
-            entity.resultMap.put("lastModDate", freshLastModDate);
+            entity.list = goodsBarcodeMapper.selectAllSimpleGoodsBarcodes(lastModDate.substring(0,8));
+            entity.map.put("lastModDate", freshLastModDate);
         }
         return entity;
     }
@@ -91,8 +110,102 @@ public class ErpServiceImpl implements ErpService {
     }
 
     @Override
-    public List<BestSelling> getBestSelling(String storeCode, String dimension, int recordPerPage, int page) {
-        return bestSellingMapper.selectBestSelling(dimension, storeCode.substring(0,1), recordPerPage, recordPerPage * page);
+    public List<BestSelling> getBestSelling(String storeCode, String dimension, int pageSize, int page) {
+        return bestSellingMapper.selectBestSelling(dimension, storeCode.substring(0,1), pageSize, pageSize * page);
+    }
+
+    @Override
+    public List<MembershipVo> getMembership(String membershipId) {
+        if(membershipId == null || membershipId.trim().length() < 8)
+            return null;
+        List<Membership> list = membershipMapper.selectMembership("%"+membershipId+"%");
+        List<MembershipVo> result = new ArrayList<>();
+        list.forEach(x->{
+            MembershipVo vo = new MembershipVo();
+            BeanUtil.copyPropertiesInclude(x,vo,new String[]{"membershipCardId","membershipName","mobile"});
+            String dateFrom = DateUtil.toStr(DateUtils.addDays(new Date(), -365), "yyyyMMdd");
+            vo.yearExpenditure = shopHistoryMapper.selectPeriodExpenditure(vo.membershipCardId, dateFrom, "20991231");
+            vo.totalExpenditure = shopHistoryMapper.selectInitialExpenditure(vo.membershipCardId, 2019) + shopHistoryMapper.selectPeriodExpenditure(vo.membershipCardId, "20190101", "20991231");
+            result.add(vo);
+        });
+        return result;
+    }
+
+    @Override
+    public int getShopHistoryCount(String membershipCardId) {
+        return shopHistoryMapper.selectShopHistoryCount(membershipCardId);
+    }
+
+    @Override
+    public List<ShopHistoryVo> getShopHistory(String membershipCardId, int pageSize, int page) {
+        List<ShopHistoryVo> result = shopHistoryMapper.selectShopHistory("SELECT nos as listNo, outdate as shopDate, nos as salesListCode, nb as quantity, now_real as amount FROM dbo.u2sale WHERE codes='"+membershipCardId+"' ORDER BY outdate desc", page*pageSize, pageSize);
+        List<String> list = new ArrayList<>();
+        list.add("");
+        result.stream().forEach(x->list.add(x.listNo));
+        List<ShopHistoryItemVo> itemList = shopHistoryMapper.selectShopHistoryItems(list);
+        result.stream().forEach(y->{
+            y.shopHistoryItemList.addAll(itemList.stream().filter(z->z.listNo.equals(y.listNo)).collect(Collectors.toList()));
+        });
+        return  result;
+    }
+
+    @Override
+    public void saveRunsaPosData(ApiController.RunsaPosDataBean posDataBean) {
+        String storeCode = "";
+        if(posDataBean.stockList.size() > 0)
+            storeCode = posDataBean.stockList.stream().findFirst().get().dbno;
+        if(storeCode.isEmpty() && posDataBean.salesList.size() > 0)
+            storeCode = posDataBean.salesList.stream().findFirst().get().cusno;
+        if(storeCode.isEmpty() && posDataBean.transferList.size() > 0)
+            storeCode = posDataBean.transferList.stream().findFirst().get().cusno;
+        if(!storeCode.isEmpty()) {
+            runsaPosSalesMapper.deleteByStoreCode(storeCode);
+            runsaPosStockMapper.deleteByStoreCode(storeCode);
+            runsaPosTransferMapper.deleteByDeliveryStoreCode(storeCode);
+            posDataBean.salesList.forEach(x -> runsaPosSalesMapper.insert(x));
+            posDataBean.stockList.forEach(x -> runsaPosStockMapper.insert(x));
+            posDataBean.transferList.forEach(x -> runsaPosTransferMapper.insert(x));
+        }
+    }
+
+    @Override
+    public List<StockVo> getRunsaPosStock(String storeCode, String goodsNo) {
+        List<StockVo> result = new ArrayList<>();
+        List<String> sizeList = goodsMapper.selectGoodsSize(goodsNo);
+        List<RunsaPosStock> stockList = runsaPosStockMapper.selectByStoreCodeAndSKC(storeCode, goodsNo);
+        List<RunsaPosSales> salesList = runsaPosSalesMapper.selectByStoreCodeAndSKC(storeCode, goodsNo);
+        sizeList.stream().forEach(size-> {
+            StockVo vo = new StockVo(size, 0, 0, 0);
+            //自己的库存
+            RunsaPosStock stock = stockList.stream().filter(f1->f1.color.equals(size)).findFirst().orElse(null);
+            if(stock != null)
+                vo.stock = stock.nb;
+            //全部库存记录
+            List<RunsaPosStock> list2 = runsaPosStockMapper.selectBySKU(goodsNo, size);
+            list2.forEach(y-> {
+                vo.storeList.add(y.dbno);
+            });
+            //库存家数
+            vo.stocksAll = list2.size();
+            int _stock = erpSimpleMapper.selectWarehouseStockBySKU(goodsNo, size);
+            if(_stock > 0) {
+                vo.storeList.add("总仓");
+                vo.stocksAll = vo.stocksAll + 1;
+            }
+            vo.sales = (int) salesList.stream().filter(f1->f1.color.equals(size)).mapToInt(bean1->bean1.nb).summaryStatistics().getSum();
+            result.add(vo);
+        });
+        return result;
+    }
+
+    @Override
+    public boolean unusedTransferList(String fromStoreCode, String toStoreCode, String listNo) {
+        return false;
+    }
+
+    @Override
+    public RunsaPosTransfer getTransferList(String listNo) {
+        return null;
     }
 
     private String getGoodsBarcodeLastModDate() {
@@ -117,7 +230,7 @@ public class ErpServiceImpl implements ErpService {
             bean.sizeDesc = goodsBarcode.sizeDesc;
             bean.barcode = goodsBarcode.barcode;
             maxModDate = maxModDate.after(goodsBarcode.lastModDate) ? maxModDate : goodsBarcode.lastModDate;
-            entity.result.add(bean);
+            entity.list.add(bean);
         }
         entity.lastModDate = new SimpleDateFormat("yyyyMMddHHmmss").format(maxModDate);
         return entity;
