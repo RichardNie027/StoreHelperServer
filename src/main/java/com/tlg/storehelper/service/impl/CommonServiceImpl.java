@@ -3,8 +3,8 @@ package com.tlg.storehelper.service.impl;
 import com.google.gson.Gson;
 import com.nec.lib.utils.Base64Util;
 import com.nec.lib.utils.FileUtil;
-import com.tlg.storehelper.pojo.BaseResponseEntity;
-import com.tlg.storehelper.pojo.SimpleMapEntity;
+import com.tlg.storehelper.pojo.BaseResponseVo;
+import com.tlg.storehelper.pojo.SimpleMapResponseVo;
 import com.tlg.storehelper.service.CommonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,29 +27,29 @@ public class CommonServiceImpl implements CommonService {
      * @return 200,801
      */
     @Override
-    public SimpleMapEntity getVersion(HttpServletResponse response, String downloadFilePath) {
+    public SimpleMapResponseVo getVersion(HttpServletResponse response, String downloadFilePath) {
         if(!downloadFilePath.endsWith("/") && !downloadFilePath.endsWith("\\"))
             downloadFilePath = downloadFilePath + "/";
 
-        SimpleMapEntity entity = new SimpleMapEntity();
+        SimpleMapResponseVo responseVo = new SimpleMapResponseVo();
         File file = new File(downloadFilePath + "version.json");
         if (file.exists()) {
             try {
                 String content= FileUtils.readFileToString(file,"UTF-8");
                 Gson gson = new Gson();
-                entity = gson.fromJson(content, SimpleMapEntity.class);
-                Double versionCode = (Double) entity.map.get("versionCode");
-                entity.map.put("versionCode", versionCode.intValue());
+                responseVo = gson.fromJson(content, SimpleMapResponseVo.class);
+                Double versionCode = (Double) responseVo.map.get("versionCode");
+                responseVo.map.put("versionCode", versionCode.intValue());
             } catch (IOException e) {
-                entity.code = 801;
-                entity.msg = "无法取得APP版本";
+                responseVo.code = 801;
+                responseVo.msg = "无法取得APP版本";
                 logger.error(e.getMessage(), e);
             }
         } else {
-            entity.code = 801;
-            entity.msg = "无法取得APP版本";
+            responseVo.code = 801;
+            responseVo.msg = "无法取得APP版本";
         }
-        return entity;
+        return responseVo;
     }
 
     /**
@@ -60,11 +60,11 @@ public class CommonServiceImpl implements CommonService {
      * @return 200,500
      */
     @Override
-    public BaseResponseEntity downloadFile(HttpServletResponse response, String downloadFilePath, String fileName) {
+    public BaseResponseVo downloadFile(HttpServletResponse response, String downloadFilePath, String fileName) {
         if(!downloadFilePath.endsWith("/") && !downloadFilePath.endsWith("\\"))
             downloadFilePath = downloadFilePath + "/";
 
-        BaseResponseEntity responseEntity = new BaseResponseEntity();
+        BaseResponseVo responseVo = new BaseResponseVo();
 
         File file = new File(downloadFilePath + fileName);
         if (file.exists()) {
@@ -83,14 +83,14 @@ public class CommonServiceImpl implements CommonService {
                     outputStream.write(buffer, 0, i);
                     i = bis.read(buffer);
                 }
-                responseEntity.code = 200;
-                responseEntity.msg = "下载成功";
+                responseVo.code = 200;
+                responseVo.msg = "下载成功";
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
                 response.reset();
                 response.setContentType("application/json;charset=UTF-8");
-                responseEntity.code = 500;
-                responseEntity.msg = "下载失败";
+                responseVo.code = 500;
+                responseVo.msg = "下载失败";
             } finally {
                 if (bis != null) {
                     try {
@@ -108,10 +108,10 @@ public class CommonServiceImpl implements CommonService {
                 }
             }
         } else {
-            responseEntity.code = 404;
-            responseEntity.msg = "文件不存在";
+            responseVo.code = 404;
+            responseVo.msg = "文件不存在";
         }
-        return responseEntity;
+        return responseVo;
     }
 
     /**
@@ -121,8 +121,8 @@ public class CommonServiceImpl implements CommonService {
      * @return 200,500
      */
     @Override
-    public BaseResponseEntity downloadFileFromStream(HttpServletResponse response, String base64File, String fileName) {
-        BaseResponseEntity responseEntity = new BaseResponseEntity();
+    public BaseResponseVo downloadFileFromStream(HttpServletResponse response, String base64File, String fileName) {
+        BaseResponseVo responseVo = new BaseResponseVo();
         byte[] bytes = Base64Util.base64ToByteArray(base64File);
         fileName = fileName + FileUtil.getFileExtension(Arrays.copyOf(bytes,10));
 
@@ -137,9 +137,9 @@ public class CommonServiceImpl implements CommonService {
             logger.error(e.getMessage(), e);
             response.reset();
             response.setContentType("application/json;charset=UTF-8");
-            responseEntity.code = 500;
-            responseEntity.msg = "下载失败";
+            responseVo.code = 500;
+            responseVo.msg = "下载失败";
         }
-        return responseEntity;
+        return responseVo;
     }
 }

@@ -7,19 +7,21 @@ public interface ApiService {
     /////////////////////////////////////////////////////////////
     ////////////////////       Login     ////////////////////////
     /////////////////////////////////////////////////////////////
-    SimpleListMapEntity<String> loginValidation(String username, String password);
+    SimpleListMapResponseVo<String> loginValidation(String username, String password);
 
 
     /////////////////////////////////////////////////////////////
     ////////////////////       Goods     ////////////////////////
     /////////////////////////////////////////////////////////////
-    SimpleListMapEntity<String> getGoodsBarcodeList(String lastModDate);
+    BaseResponseVo getGoodsBarcodeNeedRefresh(String lastModDate);
+    GoodsInfoResponseVo getGoodsList(String lastModDate);
+    SimpleListResponseVo<GoodsPopularityVo> getGoodsPopularity(String storeCode);
     //GoodsBarcodeEntity getGoodsBarcodeList(String lastModDate);
 
     /////////////////////////////////////////////////////////////
     ////////////////////    Inventory    ////////////////////////
     /////////////////////////////////////////////////////////////
-    BaseResponseEntity uploadInventory(InventoryEntity inventoryEntity);
+    BaseResponseVo uploadInventory(InventoryEntity inventoryEntity);
 
     /////////////////////////////////////////////////////////////
     ///////////////////    Collocation    ///////////////////////
@@ -29,18 +31,18 @@ public interface ApiService {
     /////////////////////////////////////////////////////////////
     ///////////////////    BestSelling    ///////////////////////
     /////////////////////////////////////////////////////////////
-    SimplePageListEntity<GoodsSimpleVo> getBestSelling(String storeCode, String dimension, int page);
+    SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCode, String dimension, int page);
 
     /////////////////////////////////////////////////////////////
     ///////////////////       Stock       ///////////////////////
     /////////////////////////////////////////////////////////////
-    SimpleListMapEntity<StockVo> getStoreStock(String storeCode, String goodsNo);
+    SimpleListMapResponseVo<StockVo> getStoreStock(String storeCode, String goodsNo);
 
     /////////////////////////////////////////////////////////////
     ///////////////   Membership Shop History ///////////////////
     /////////////////////////////////////////////////////////////
-    SimpleListEntity<MembershipVo> getMembership(String membershipId, String storeCode);
-    SimplePageListEntity<ShopHistoryVo> getMembershipShopHistory(String membershipId, String storeCode, int page);
+    SimpleListResponseVo<MembershipVo> getMembership(String membershipId, String storeCode);
+    SimplePageListResponseVo<ShopHistoryVo> getMembershipShopHistory(String membershipId, String storeCode, int page);
 
 
 }

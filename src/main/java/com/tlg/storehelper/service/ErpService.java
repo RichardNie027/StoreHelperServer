@@ -7,10 +7,7 @@ import com.tlg.storehelper.entity.ds1.Membership;
 import com.tlg.storehelper.entity.ds3.RunsaPosTransfer;
 import com.tlg.storehelper.entity.ds3.BestSelling;
 import com.tlg.storehelper.entity.ds3.Collocation;
-import com.tlg.storehelper.pojo.MembershipVo;
-import com.tlg.storehelper.pojo.ShopHistoryVo;
-import com.tlg.storehelper.pojo.SimpleListMapEntity;
-import com.tlg.storehelper.pojo.StockVo;
+import com.tlg.storehelper.pojo.*;
 
 import java.util.List;
 
@@ -20,9 +17,12 @@ public interface ErpService {
 
     ErpUser getUserByAccount(String userAccount);
 
-    SimpleListMapEntity<String> getAllSimpleGoodsBarcodes(String lastModDate);
+    boolean getGoodsBarcodeNeedRefresh(String lastModDate);
+
+    List<String> getAllSimpleGoodsBarcodes(String lastModDate);
 
     //GoodsBarcodeEntity getLastestGoodsBarcodes(String lastModDate);
+    List<String> getAllSimpleGoods(String lastModDate);
 
     Goods getGoods(String goodsNo);
 
@@ -30,7 +30,7 @@ public interface ErpService {
 
     String getGoodsPictureName(String goodsNo);
 
-    List<Goods> getAllGoods();
+    List<GoodsPopularityVo> getGoodsPopularity(String storeCode);
 
     List<Collocation> getCollocation(String goodsNo);
 
@@ -55,4 +55,6 @@ public interface ErpService {
     /**取浪沙调拨单*/
     RunsaPosTransfer getTransferList(String listNo);
 
+    /**条码最新修改时间*/
+    String getGoodsBarcodeLastModDate();
 }

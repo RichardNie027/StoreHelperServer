@@ -26,11 +26,11 @@ public class ApiController {
 
     //接收浪沙POS销售、实时库存、调拨单
     @RequestMapping(value = "/pre_api/uploadPosData", method = RequestMethod.POST)
-    public BaseResponseEntity uploadPosData(@RequestBody RunsaPosDataBean dataBean){
+    public BaseResponseVo uploadPosData(@RequestBody RunsaPosDataBean dataBean){
         erpService.saveRunsaPosData(dataBean);
-        BaseResponseEntity entity = new SimpleListMapEntity<String>();
-        entity.setSuccessfulMessage("OK");
-        return entity;
+        BaseResponseVo responseVo = new SimpleListMapResponseVo<String>();
+        responseVo.setSuccessfulMessage("OK");
+        return responseVo;
     }
 
     public static class RunsaPosDataBean {
@@ -39,8 +39,12 @@ public class ApiController {
         public List<RunsaPosTransfer> transferList = new ArrayList<>();
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+
     @RequestMapping(value = "/pre_api/login", method = RequestMethod.POST)
-    public SimpleListMapEntity<String> loginValidation(@RequestBody LoginBean loginBean){
+    public SimpleListMapResponseVo<String> loginValidation(@RequestBody LoginBean loginBean){
         return apiService.loginValidation(loginBean.username, loginBean.password);
     }
 
@@ -50,13 +54,23 @@ public class ApiController {
         public LoginBean() {}
     }
 
-    @RequestMapping("/api/getGoodsBarcodeList")
-    public SimpleListMapEntity<String> getGoodsBarcodeList(String lastModDate){
-        return apiService.getGoodsBarcodeList(lastModDate);
+    @RequestMapping("/api/getGoodsBarcodeNeedRefresh")
+    public BaseResponseVo getGoodsBarcodeNeedRefresh(String lastModDate){
+        return apiService.getGoodsBarcodeNeedRefresh(lastModDate);
+    }
+
+    @RequestMapping("/api/getGoodsList")
+    public GoodsInfoResponseVo getGoodsList(String lastModDate){
+        return apiService.getGoodsList(lastModDate);
+    }
+
+    @RequestMapping("/api/getGoodsPopularity")
+    public SimpleListResponseVo<GoodsPopularityVo> getGoodsPopularity(String storeCode){
+        return apiService.getGoodsPopularity(storeCode);
     }
 
     @RequestMapping(value = "/api/uploadInventory", method = RequestMethod.POST)
-    public BaseResponseEntity uploadInventory(@RequestBody InventoryEntity inventoryEntity){
+    public BaseResponseVo uploadInventory(@RequestBody InventoryEntity inventoryEntity){
         return apiService.uploadInventory(inventoryEntity);
     }
 
@@ -66,22 +80,22 @@ public class ApiController {
     }
 
     @RequestMapping("/api/getBestSelling")
-    public SimplePageListEntity<GoodsSimpleVo> getBestSelling(String storeCode, String dim, int page){
+    public SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCode, String dim, int page){
         return apiService.getBestSelling(storeCode, dim, page);
     }
 
     @RequestMapping("/api/getStoreStock")
-    public SimpleListMapEntity<StockVo> getStoreStock(String storeCode, String goodsNo){
+    public SimpleListMapResponseVo<StockVo> getStoreStock(String storeCode, String goodsNo){
         return apiService.getStoreStock(storeCode, goodsNo);
     }
 
     @RequestMapping("/api/getMembership")
-    public SimpleListEntity<MembershipVo> getMembership(String membershipId, String storeCode){
+    public SimpleListResponseVo<MembershipVo> getMembership(String membershipId, String storeCode){
         return apiService.getMembership(membershipId, storeCode);
     }
 
     @RequestMapping("/api/getMembershipShopHistory")
-    public SimplePageListEntity<ShopHistoryVo> getMembershipShopHistory(String membershipId, String storeCode, int page){
+    public SimplePageListResponseVo<ShopHistoryVo> getMembershipShopHistory(String membershipId, String storeCode, int page){
         return apiService.getMembershipShopHistory(membershipId, storeCode, page);
     }
 

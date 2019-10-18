@@ -19,7 +19,7 @@ public interface GoodsBarcodeMapper {
     List<GoodsBarcode> selectLastestGoodsBarcodes(String lastModDate);*/
 
 //    @Select("SELECT BARCODE FROM REGENTD.GOODSBARCODE ORDER BY BARCODE")  //Regent
-    @Select("SELECT words+'|'+colthno as BARCODE FROM dbo.coloth WHERE words<>'' AND DATEDIFF(hour,convert(datetime, #{lastModDate}),gxrq) > 0 ORDER BY words")   //条码|货号的混码
+    @Select("SELECT words+'|'+colthno+'|'+SUBSTRING(color_nos,4,9) as BARCODE FROM dbo.coloth WHERE words<>'' AND DATEDIFF(hour,convert(datetime, #{lastModDate}),gxrq) > 0 ORDER BY words")   //条码|货号的混码
     List<String> selectAllSimpleGoodsBarcodes(String lastModDate);
 
 //    @Select("SELECT nvl(to_char(max(LASTMODDATE), 'yyyy-mm-dd hh24:mi:ss'), ' ') LASTMODDATE FROM REGENTD.GOODSBARCODE")  //Regent

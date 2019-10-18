@@ -3,7 +3,7 @@ package com.tlg.storehelper.pojo;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CollocationEntity extends BaseResponseEntity {
+public class CollocationEntity extends BaseResponseVo {
 
     public List<DetailBean> detail = new ArrayList<>();
 

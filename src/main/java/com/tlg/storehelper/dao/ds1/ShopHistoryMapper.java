@@ -17,13 +17,16 @@ public interface ShopHistoryMapper {
     List<ShopHistoryVo> selectShopHistory(String sql, int start, int pageSize);
 
     // “<>” 转义为 &lt;&gt;
-    @Select("<script> select a.nos as listNo, a.colthno as goodsNo, a.color as size, b.colthname as goodsName, a.nb as quantity, a.price, ROUND(a.pers,1) as discount, a.proprice as realPrice, a.nb*a.proprice as amount, a.salescode+c.names as sales from u2saleb a left join coloth_t b on a.colthno=b.colthno left join zg_sales c on a.salescode=c.codes where a.price &lt;&gt; 1 and a.nos in "+
+    @Select("<script> select a.nos as listNo, a.colthno as goodsNo, a.color as size, b.colthname as goodsName, a.nb as quantity, a.price, ROUND(a.pers,1) as discount, a.proprice as realPrice, a.nb*a.proprice as amount, c.names+' '+a.salescode as sales from u2saleb a left join coloth_t b on a.colthno=b.colthno left join zg_sales c on a.salescode=c.codes where a.price &lt;&gt; 1 and a.nos in "+
             "<foreach item='item' index='index' collection='listNos' open='(' separator=',' close=')'> " +
             " #{item} "+
             "</foreach> "+
             "order by nos "+
             "</script>")
     List<ShopHistoryItemVo> selectShopHistoryItems(@Param("listNos") List<String> listNos);
+
+    @Select("SELECT round(isnull(SUM(now_real),0)/case when count(*)=0 then 1 else count(*) end,0) AS amount FROM dbo.u2sale WHERE codes=#{membershipCardId} AND nb>0")
+    int selectPerExpenditure(String membershipCardId);
 
     @Select("SELECT isnull(SUM(now_real),0) AS amount FROM dbo.u2sale WHERE codes=#{membershipCardId} AND outdate>=#{date8From} AND outdate<=#{date8To}")
     int selectPeriodExpenditure(String membershipCardId, String date8From, String date8To);

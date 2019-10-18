@@ -9,6 +9,8 @@ public class MembershipVo implements Serializable {
     public String membershipName;
     /**手机号*/
     public String mobile;
+    /**单次消费*/
+    public int perExpenditure;
     /**年度消费*/
     public int yearExpenditure;
     /**总消费额*/

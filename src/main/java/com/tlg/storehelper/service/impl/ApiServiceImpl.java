@@ -3,7 +3,6 @@ package com.tlg.storehelper.service.impl;
 import com.nec.lib.utils.StringUtil;
 import com.tlg.storehelper.entity.ds1.ErpUser;
 import com.tlg.storehelper.entity.ds1.Goods;
-import com.tlg.storehelper.entity.ds1.Membership;
 import com.tlg.storehelper.entity.ds3.BestSelling;
 import com.tlg.storehelper.entity.ds3.Collocation;
 import com.tlg.storehelper.pojo.*;
@@ -24,8 +23,8 @@ public class ApiServiceImpl implements ApiService {
     private BusinessService businessService;
 
     @Override
-    public SimpleListMapEntity<String> loginValidation(String username, String password) {
-        SimpleListMapEntity<String> entity = new SimpleListMapEntity();
+    public SimpleListMapResponseVo<String> loginValidation(String username, String password) {
+        SimpleListMapResponseVo<String> responseVo = new SimpleListMapResponseVo();
         ErpUser user = null;
         if(username!=null && password!=null) {
             try {
@@ -53,46 +52,69 @@ public class ApiServiceImpl implements ApiService {
         }
         if(user != null && user.password.equals(password)) {
             if(user.type == 2)
-                entity.list.add(user.userAccount);
+                responseVo.list.add(user.userAccount);
             else {
                 for(ErpUser eachUser: erpService.getAllStoreUsers()) {
                     if(eachUser.userAccount.length() == 3)
-                        entity.list.add(eachUser.userAccount);
+                        responseVo.list.add(eachUser.userAccount);
                 }
             }
             String token = businessService.registerLoginAndGetToken(username);
-            entity.map.put("token", token);
-            entity.setSuccessfulMessage("登录成功");
+            responseVo.map.put("token", token);
+            responseVo.setSuccessfulMessage("登录成功");
         } else {
-            entity.code = 1005;
-            entity.msg = "用户名密码错误";
+            responseVo.code = 1005;
+            responseVo.msg = "用户名密码错误";
         }
-        return entity;
+        return responseVo;
     }
 
     @Override
-    public SimpleListMapEntity<String> getGoodsBarcodeList(String lastModDate) {
-        SimpleListMapEntity<String> entity = erpService.getAllSimpleGoodsBarcodes(lastModDate);
-        if(entity.list.size() == 0) {
-            entity.code = 200;
-            entity.msg = "商品资料已经是最新";
+    public BaseResponseVo getGoodsBarcodeNeedRefresh(String lastModDate) {
+        BaseResponseVo responseVo = new BaseResponseVo();
+        if(erpService.getGoodsBarcodeNeedRefresh(lastModDate))
+            responseVo.setSuccessfulMessage("1");
+        else
+            responseVo.setSuccessfulMessage("0");
+        return responseVo;
+    }
+
+    @Override
+    public GoodsInfoResponseVo getGoodsList(String lastModDate) {
+        GoodsInfoResponseVo responseVo = new GoodsInfoResponseVo();
+        String freshLastModDate = erpService.getGoodsBarcodeLastModDate();
+        if(freshLastModDate.compareTo(lastModDate) > 0) {
+            responseVo.lastModDate = freshLastModDate;
+            responseVo.goodsList = erpService.getAllSimpleGoods(lastModDate);
+            responseVo.goodsBarcodeList = erpService.getAllSimpleGoodsBarcodes(lastModDate);
         } else
-            entity.setSuccessfulMessage("商品条码取得成功");
-
-        return entity;
+            responseVo.lastModDate = "";
+        if(responseVo.goodsList.isEmpty() && responseVo.goodsBarcodeList.isEmpty())
+            responseVo.setSuccessfulMessage("商品资料已经是最新");
+        else
+            responseVo.setSuccessfulMessage("商品条码获取成功");
+        return responseVo;
     }
 
     @Override
-    public BaseResponseEntity uploadInventory(InventoryEntity inventoryEntity) {
+    public SimpleListResponseVo<GoodsPopularityVo> getGoodsPopularity(String storeCode) {
+        SimpleListResponseVo<GoodsPopularityVo> responseVo = new SimpleListResponseVo<GoodsPopularityVo>();
+        responseVo.list = erpService.getGoodsPopularity(storeCode);
+        responseVo.setSuccessfulMessage("商品热度获取成功");
+        return responseVo;
+    }
+
+    @Override
+    public BaseResponseVo uploadInventory(InventoryEntity inventoryEntity) {
         String result = businessService.uploadInventory(inventoryEntity);
-        BaseResponseEntity entity = new BaseResponseEntity();
+        BaseResponseVo responseVo = new BaseResponseVo();
         if(result.equals(""))
-            entity.setSuccessfulMessage("上传成功");
+            responseVo.setSuccessfulMessage("上传成功");
         else {
-            entity.code = 2005;
-            entity.msg = "盘点单保存失败";
+            responseVo.code = 2005;
+            responseVo.msg = "盘点单保存失败";
         }
-        return entity;
+        return responseVo;
     }
 
     @Override
@@ -124,55 +146,55 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public SimplePageListEntity<GoodsSimpleVo> getBestSelling(String storeCode, String dimension, int page) {
+    public SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCode, String dimension, int page) {
         int recordCount = erpService.getBestSellingCount(storeCode, dimension);
         int pageSize = 10;
-        SimplePageListEntity<GoodsSimpleVo> entity = new SimplePageListEntity<GoodsSimpleVo>(page, (int)Math.ceil((double)recordCount/pageSize), pageSize, recordCount);
+        SimplePageListResponseVo<GoodsSimpleVo> responseVo = new SimplePageListResponseVo<GoodsSimpleVo>(page, (int)Math.ceil((double)recordCount/pageSize), pageSize, recordCount);
         List<BestSelling> list = erpService.getBestSelling(storeCode, dimension, pageSize, page);
         for(BestSelling bestSelling: list) {
-            entity.list.add(new GoodsSimpleVo(bestSelling.goodsNo, "", bestSelling.price, String.valueOf(bestSelling.quantity), bestSelling.pic));
+            responseVo.list.add(new GoodsSimpleVo(bestSelling.goodsNo, "", bestSelling.price, String.valueOf(bestSelling.quantity), bestSelling.pic));
         }
-        entity.setSuccessfulMessage("畅销款获取成功");
-        return entity;
+        responseVo.setSuccessfulMessage("畅销款获取成功");
+        return responseVo;
     }
 
     @Override
-    public SimpleListMapEntity<StockVo> getStoreStock(String storeCode, String goodsNo) {
-        SimpleListMapEntity<StockVo> entity = new SimpleListMapEntity();
-        entity.map.put("goodsNo", goodsNo);
+    public SimpleListMapResponseVo<StockVo> getStoreStock(String storeCode, String goodsNo) {
+        SimpleListMapResponseVo<StockVo> responseVo = new SimpleListMapResponseVo();
+        responseVo.map.put("goodsNo", goodsNo);
         Goods goods = erpService.getGoods(goodsNo);
         if(goods!=null)
-            entity.map.put("goodsName", goods.goodsName);
+            responseVo.map.put("goodsName", goods.goodsName);
         else
-            entity.map.put("goodsName", "");
-        entity.list.addAll(erpService.getRunsaPosStock(storeCode, goodsNo));
+            responseVo.map.put("goodsName", "");
+        responseVo.list.addAll(erpService.getRunsaPosStock(storeCode, goodsNo));
 
-        entity.setSuccessfulMessage("库存获取成功");
-        return entity;
+        responseVo.setSuccessfulMessage("库存获取成功");
+        return responseVo;
     }
 
-    public SimpleListEntity<MembershipVo> getMembership(String membershipId, String storeCode) {
-        SimpleListEntity<MembershipVo> result = new SimpleListEntity();
+    public SimpleListResponseVo<MembershipVo> getMembership(String membershipId, String storeCode) {
+        SimpleListResponseVo<MembershipVo> responseVo = new SimpleListResponseVo();
         List<MembershipVo> membershipList = erpService.getMembership(membershipId);
         if(membershipList == null || membershipList.size() == 0) {
-            result.code = 2001;
-            result.msg = "会员未识别";
-            return result;
+            responseVo.code = 2001;
+            responseVo.msg = "会员未识别";
+            return responseVo;
         }
-        result.list.addAll(membershipList);
-        result.setSuccessfulMessage("会员信息获取成功");
-        return result;
+        responseVo.list.addAll(membershipList);
+        responseVo.setSuccessfulMessage("会员信息获取成功");
+        return responseVo;
     }
 
     @Override
-    public SimplePageListEntity<ShopHistoryVo> getMembershipShopHistory(String membershipId, String storeCode, int page) {
+    public SimplePageListResponseVo<ShopHistoryVo> getMembershipShopHistory(String membershipId, String storeCode, int page) {
         int recordCount = erpService.getShopHistoryCount(membershipId);
         int pageSize = 10;
         List<ShopHistoryVo> list = erpService.getShopHistory(membershipId, pageSize, page);
-        SimplePageListEntity<ShopHistoryVo> entity = new SimplePageListEntity<ShopHistoryVo>(page, (int)Math.ceil((double)recordCount/pageSize), pageSize, recordCount);
-        entity.list.addAll(list);
-        entity.setSuccessfulMessage("会员信息获取成功");
-        return entity;
+        SimplePageListResponseVo<ShopHistoryVo> responseVo = new SimplePageListResponseVo<ShopHistoryVo>(page, (int)Math.ceil((double)recordCount/pageSize), pageSize, recordCount);
+        responseVo.list.addAll(list);
+        responseVo.setSuccessfulMessage("会员信息获取成功");
+        return responseVo;
     }
 
     /*

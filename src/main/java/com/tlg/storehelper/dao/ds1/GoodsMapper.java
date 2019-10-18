@@ -7,8 +7,8 @@ import java.util.List;
 
 public interface GoodsMapper {
 
-    @Select("SELECT colthno AS goodsNo, colthname AS goodsName, ceiling(sprice) AS price FROM dbo.coloth_t")
-    List<Goods> selectAllGoods();
+    @Select("SELECT t.colthno+'|'+rtrim(colthnob)+'|'+rtrim(colthname2)+'|'+STR_REPLACE(t.colthname,'|','')+'|'+convert(VARCHAR,convert(INTEGER,t.sprice))+'|'+a.classno+'|'+ltrim(b.bz)+'|'+STR_REPLACE(convert(VARCHAR(18),a.gxrq,102),'.','-') as GOODSINFO FROM dbo.coloth_t t LEFT JOIN cltypep a ON t.colthno=a.colthno LEFT JOIN cltypeb b ON a.typeno='001' AND a.classno=b.classno WHERE DATEDIFF(hour,convert(datetime, #{lastModDate}),t.gxrq) > 0 AND a.typeno='001' AND b.bz<>'' ORDER BY t.colthno")   //货号|款码|颜色值|名称|牌价|品牌|店码组|更新日期的混码
+    List<String> selectAllSimpleGoods(String lastModDate);
 
     @Select("SELECT colthno AS goodsNo, colthname AS goodsName, substring(talka,len(talka)-charindex('\\',reverse(talka))+2,1000) AS pic, ceiling(sprice) AS price FROM dbo.coloth_t WHERE colthno=#{goodsNo}")
     Goods selectGoods(String goodsNo);

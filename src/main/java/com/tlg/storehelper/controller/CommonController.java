@@ -3,8 +3,8 @@ package com.tlg.storehelper.controller;
 import com.nec.lib.utils.Base64Util;
 import com.nec.lib.utils.DateUtil;
 import com.nec.lib.utils.RedisUtil;
-import com.tlg.storehelper.pojo.BaseResponseEntity;
-import com.tlg.storehelper.pojo.SimpleMapEntity;
+import com.tlg.storehelper.pojo.BaseResponseVo;
+import com.tlg.storehelper.pojo.SimpleMapResponseVo;
 import com.tlg.storehelper.service.BusinessService;
 import com.tlg.storehelper.service.CommonService;
 import com.tlg.storehelper.service.ErpService;
@@ -32,32 +32,36 @@ public class CommonController {
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
 
+    /**
+     * 为店铺代理程序提供：动态密码（3位）、后台基准日期（8位）
+     * 可选提供：微销转货单的目标店铺集（4位一组，逗号分隔）+ 当日销售和库存的回传URL（http开头）
+     */
     @RequestMapping(value = "/pre_api/dynamicPwd")
-    private BaseResponseEntity storeDynamicPwd(HttpServletResponse response, String storeCode, String ip) {
-        String targetStoreCode = "A999";    //浪沙回传数据：微销转货单目标店铺
+    private BaseResponseVo storeDynamicPwd(HttpServletResponse response, String storeCode, String ip) {
+        String targetStoreCode = "A999";    //浪沙回传数据：微销转货单的目标店铺，多店铺以“逗号”分隔
         String pwd = businessService.getStoreDynamicPwd(storeCode, ip);
-        BaseResponseEntity baseResponseEntity = new BaseResponseEntity();
+        BaseResponseVo baseResponseVo = new BaseResponseVo();
         if (pwd != null) {
             String today = DateUtil.toStr(new Date(), "yyyyMMdd");
             //today = "20190630";   //debug
             String url4Upload = "http://192.168.1.5:8080/storehelper/pre_api/uploadPosData";
-            //baseResponseEntity.setSuccessfulMessage(Base64Util.byteArrayToBase64((pwd + today).getBytes()));  //不回传浪沙数据
-            baseResponseEntity.setSuccessfulMessage(Base64Util.byteArrayToBase64((pwd + today + targetStoreCode + url4Upload).getBytes()));
+            //baseResponseVo.setSuccessfulMessage(Base64Util.byteArrayToBase64((pwd + today).getBytes()));  //不回传浪沙数据
+            baseResponseVo.setSuccessfulMessage(Base64Util.byteArrayToBase64((pwd + today + targetStoreCode + url4Upload).getBytes()));
         } else {
-            baseResponseEntity.code = 404;
-            baseResponseEntity.msg = "";
+            baseResponseVo.code = 404;
+            baseResponseVo.msg = "";
         }
-        return baseResponseEntity;
+        return baseResponseVo;
     }
 
     @RequestMapping(value = "/pre_api/appVersion")
-    private SimpleMapEntity storeHelperAppLastestVersion(HttpServletResponse response) {
+    private SimpleMapResponseVo storeHelperAppLastestVersion(HttpServletResponse response) {
         return commonService.getVersion(response, sApkPath);
     }
 
     @RequestMapping(value = "/pre_api/downloadApk", method=RequestMethod.GET)
     private void downloadApk(HttpServletResponse response) {
-        BaseResponseEntity ret = commonService.downloadFile(response, sApkPath, sApkFilename);
+        BaseResponseVo ret = commonService.downloadFile(response, sApkPath, sApkFilename);
         if(ret.code != 200) {
             response.setStatus(404);
             response.setHeader("msg", "Apk download error.");
@@ -74,7 +78,7 @@ public class CommonController {
                 response.setStatus(1007);
                 response.setHeader("msg", "No Pic");
             }
-            BaseResponseEntity ret = commonService.downloadFileFromStream(response, picStream, goodsNo);
+            BaseResponseVo ret = commonService.downloadFileFromStream(response, picStream, goodsNo);
             if(ret == null || ret.code != 200) {
                 response.setStatus(404);
                 response.setHeader("msg", ret==null ? "" : ret.msg);

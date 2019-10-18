@@ -3,7 +3,8 @@ package com.tlg.storehelper.pojo;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GoodsBarcodeEntity extends BaseResponseEntity {
+@Deprecated
+public class GoodsBarcodeEntity extends BaseResponseVo {
 
     public List<ResultBean> result = new ArrayList<>();
 

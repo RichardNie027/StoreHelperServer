@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,6 +51,8 @@ public class ErpServiceImpl implements ErpService {
     private RunsaPosStockMapper runsaPosStockMapper;
     @Autowired
     private RunsaPosTransferMapper runsaPosTransferMapper;
+    @Autowired
+    private GoodsPopularityMapper goodsPopularityMapper;
 
     @Value("${properties.erp_service.resource_url}")
     private String ResourceUrl;
@@ -67,14 +68,19 @@ public class ErpServiceImpl implements ErpService {
     }
 
     @Override
-    public SimpleListMapEntity<String> getAllSimpleGoodsBarcodes(String lastModDate) {
-        SimpleListMapEntity<String> entity = new SimpleListMapEntity();
+    public boolean getGoodsBarcodeNeedRefresh(String lastModDate) {
         String freshLastModDate = getGoodsBarcodeLastModDate();
-        if(freshLastModDate.compareTo(lastModDate) > 0) {
-            entity.list = goodsBarcodeMapper.selectAllSimpleGoodsBarcodes(lastModDate.substring(0,8));
-            entity.map.put("lastModDate", freshLastModDate);
-        }
-        return entity;
+        return freshLastModDate.compareTo(lastModDate) > 0;
+    }
+
+    @Override
+    public List<String> getAllSimpleGoodsBarcodes(String lastModDate) {
+        return goodsBarcodeMapper.selectAllSimpleGoodsBarcodes(lastModDate.substring(0,8));
+    }
+
+    @Override
+    public List<String> getAllSimpleGoods(String lastModDate) {
+        return goodsMapper.selectAllSimpleGoods(lastModDate.substring(0,8));
     }
 
     @Override
@@ -85,8 +91,8 @@ public class ErpServiceImpl implements ErpService {
     @Override
     public boolean queryGoodsPicture(String goodsNo) {
         String resp = NetUtil.request(ResourceUrl + goodsNo, null, "GET", "json");
-        BaseResponseEntity entity = new Gson().fromJson(resp, BaseResponseEntity.class);
-        return entity != null && entity.code == 200;
+        BaseResponseVo responseVo = new Gson().fromJson(resp, BaseResponseVo.class);
+        return responseVo != null && responseVo.code == 200;
     }
 
     @Override
@@ -95,8 +101,8 @@ public class ErpServiceImpl implements ErpService {
     }
 
     @Override
-    public List<Goods> getAllGoods() {
-        return goodsMapper.selectAllGoods();
+    public List<GoodsPopularityVo> getGoodsPopularity(String storeCode) {
+        return goodsPopularityMapper.selectPopularities("%"+storeCode.substring(0,1)+"%");
     }
 
     @Override
@@ -124,6 +130,7 @@ public class ErpServiceImpl implements ErpService {
             MembershipVo vo = new MembershipVo();
             BeanUtil.copyPropertiesInclude(x,vo,new String[]{"membershipCardId","membershipName","mobile"});
             String dateFrom = DateUtil.toStr(DateUtils.addDays(new Date(), -365), "yyyyMMdd");
+            vo.perExpenditure = shopHistoryMapper.selectPerExpenditure(vo.membershipCardId);
             vo.yearExpenditure = shopHistoryMapper.selectPeriodExpenditure(vo.membershipCardId, dateFrom, "20991231");
             vo.totalExpenditure = shopHistoryMapper.selectInitialExpenditure(vo.membershipCardId, 2019) + shopHistoryMapper.selectPeriodExpenditure(vo.membershipCardId, "20190101", "20991231");
             result.add(vo);
@@ -208,7 +215,8 @@ public class ErpServiceImpl implements ErpService {
         return null;
     }
 
-    private String getGoodsBarcodeLastModDate() {
+    @Override
+    public String getGoodsBarcodeLastModDate() {
         String lastModDate = goodsBarcodeMapper.selectLastModDate();
         return lastModDate.trim().equals("") ? "20000101000000" : lastModDate;
     }

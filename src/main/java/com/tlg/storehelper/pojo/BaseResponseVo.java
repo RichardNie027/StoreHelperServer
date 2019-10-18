@@ -2,7 +2,7 @@ package com.tlg.storehelper.pojo;
 
 import java.io.Serializable;
 
-public class BaseResponseEntity implements Serializable {
+public class BaseResponseVo implements Serializable {
 
     public int code = -1;   //如需重命名，在子类重定义变量且加注释@SerializedName("error_code")
     public String msg = "";
