@@ -25,6 +25,6 @@ public interface RunsaPosSalesMapper {
     @Select("SELECT * FROM " + TABLE + " WHERE cusno=#{storeCode} and colthno=#{goodsNo}")
     List<RunsaPosSales> selectByStoreCodeAndSKC(String storeCode, String goodsNo);
 
-    @Select("SELECT * FROM " + TABLE + " WHERE cusno=#{storeCode} and colthno=#{goodsNo} and color=#{size}")
-    List<RunsaPosSales> selectByStoreCodeAndSKU(String storeCode, String goodsNo, String size);
+    @Select("SELECT * FROM " + TABLE + " WHERE colthno=#{goodsNo} and color=#{size}")
+    List<RunsaPosSales> selectBySKU(String goodsNo, String size);
 }

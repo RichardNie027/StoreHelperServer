@@ -42,6 +42,8 @@ public class ErpServiceImpl implements ErpService {
     @Autowired
     private BestSellingMapper bestSellingMapper;
     @Autowired
+    private StoreSellingMapper storeSellingMapper;
+    @Autowired
     private ErpSimpleMapper erpSimpleMapper;
     @Autowired
     private SimpleMapper simpleMapper;
@@ -68,7 +70,7 @@ public class ErpServiceImpl implements ErpService {
     }
 
     @Override
-    public boolean getGoodsBarcodeNeedRefresh(String lastModDate) {
+    public boolean getGoodsNeedUpdate(String lastModDate) {
         String freshLastModDate = getGoodsBarcodeLastModDate();
         return freshLastModDate.compareTo(lastModDate) > 0;
     }
@@ -81,6 +83,11 @@ public class ErpServiceImpl implements ErpService {
     @Override
     public List<String> getAllSimpleGoods(String lastModDate) {
         return goodsMapper.selectAllSimpleGoods(lastModDate.substring(0,8));
+    }
+
+    @Override
+    public List<String> getAllGoodsNoInSameStyle(String goodsNo) {
+        return goodsMapper.selectGoodsNoInSameStyle(goodsNo);
     }
 
     @Override
@@ -118,6 +125,11 @@ public class ErpServiceImpl implements ErpService {
     @Override
     public List<BestSelling> getBestSelling(String storeCode, String dimension, int pageSize, int page) {
         return bestSellingMapper.selectBestSelling(dimension, storeCode.substring(0,1), pageSize, pageSize * page);
+    }
+
+    @Override
+    public List<StoreSelling> getStoreSelling(String dimension, String goodsNo, boolean includeSameStyle) {
+        return storeSellingMapper.selectStoreSelling(dimension, goodsNo, includeSameStyle);
     }
 
     @Override
@@ -176,30 +188,32 @@ public class ErpServiceImpl implements ErpService {
     }
 
     @Override
-    public List<StockVo> getRunsaPosStock(String storeCode, String goodsNo) {
-        List<StockVo> result = new ArrayList<>();
+    public List<GoodsSizePsiVo> getRunsaPosStock(String storeCode, String goodsNo) {
+        List<GoodsSizePsiVo> result = new ArrayList<>();
         List<String> sizeList = goodsMapper.selectGoodsSize(goodsNo);
-        List<RunsaPosStock> stockList = runsaPosStockMapper.selectByStoreCodeAndSKC(storeCode, goodsNo);
-        List<RunsaPosSales> salesList = runsaPosSalesMapper.selectByStoreCodeAndSKC(storeCode, goodsNo);
         sizeList.stream().forEach(size-> {
-            StockVo vo = new StockVo(size, 0, 0, 0);
-            //自己的库存
-            RunsaPosStock stock = stockList.stream().filter(f1->f1.color.equals(size)).findFirst().orElse(null);
-            if(stock != null)
-                vo.stock = stock.nb;
-            //全部库存记录
-            List<RunsaPosStock> list2 = runsaPosStockMapper.selectBySKU(goodsNo, size);
-            list2.forEach(y-> {
-                vo.storeList.add(y.dbno);
+            GoodsSizePsiVo vo = new GoodsSizePsiVo(size);
+            //全部店铺库存
+            List<RunsaPosStock> stockList = runsaPosStockMapper.selectBySKU(goodsNo, size);
+            stockList.forEach(y-> {
+                vo.psiMap.put(y.dbno, new PsiVo(0,0,0, 0, y.nb));
             });
-            //库存家数
-            vo.stocksAll = list2.size();
+            //总仓库存
             int _stock = erpSimpleMapper.selectWarehouseStockBySKU(goodsNo, size);
             if(_stock > 0) {
-                vo.storeList.add("总仓");
-                vo.stocksAll = vo.stocksAll + 1;
+                vo.psiMap.put("总仓", new PsiVo(0,0,0, 0, _stock));
             }
-            vo.sales = (int) salesList.stream().filter(f1->f1.color.equals(size)).mapToInt(bean1->bean1.nb).summaryStatistics().getSum();
+            //全部店铺销售
+            List<RunsaPosSales> salesList = runsaPosSalesMapper.selectBySKU(goodsNo, size);
+            salesList.forEach(y-> {
+                if(vo.psiMap.containsKey(y.cusno)) {
+                    PsiVo psiVo = vo.psiMap.get(y.cusno);
+                    psiVo.s = y.nb;
+                    psiVo.sa = y.nb * y.proprice;
+                } else {
+                    vo.psiMap.put(y.cusno, new PsiVo(0, 0, y.nb, y.nb * y.proprice, 0));
+                }
+            });
             result.add(vo);
         });
         return result;

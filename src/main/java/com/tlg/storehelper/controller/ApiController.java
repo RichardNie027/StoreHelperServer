@@ -54,9 +54,9 @@ public class ApiController {
         public LoginBean() {}
     }
 
-    @RequestMapping("/api/getGoodsBarcodeNeedRefresh")
-    public BaseResponseVo getGoodsBarcodeNeedRefresh(String lastModDate){
-        return apiService.getGoodsBarcodeNeedRefresh(lastModDate);
+    @RequestMapping("/api/getGoodsNeedUpdate")
+    public BaseResponseVo getGoodsNeedUpdate(String lastModDate){
+        return apiService.getGoodsNeedUpdate(lastModDate);
     }
 
     @RequestMapping("/api/getGoodsList")
@@ -80,13 +80,18 @@ public class ApiController {
     }
 
     @RequestMapping("/api/getBestSelling")
-    public SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCode, String dim, int page){
-        return apiService.getBestSelling(storeCode, dim, page);
+    public SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCode, String dim, int page, Integer pageSize){
+        return apiService.getBestSelling(storeCode, dim, page, pageSize==null||pageSize<10 ? 10:pageSize);
     }
 
-    @RequestMapping("/api/getStoreStock")
-    public SimpleListMapResponseVo<StockVo> getStoreStock(String storeCode, String goodsNo){
-        return apiService.getStoreStock(storeCode, goodsNo);
+    @RequestMapping("/api/getStoreSelling")
+    public SellingVo getStoreStock(String dim, String goodsNo, boolean includeSameStyle){
+        return apiService.getStoreSelling(dim, goodsNo, includeSameStyle);
+    }
+
+    @RequestMapping("/api/getStorePsi")
+    public SimpleListResponseVo<GoodsPsiVo> getStorePsi(String storeCode, String goodsNo){
+        return apiService.getStorePsi(storeCode, goodsNo);
     }
 
     @RequestMapping("/api/getMembership")

@@ -5,8 +5,6 @@ import java.util.List;
 
 public class CollocationEntity extends BaseResponseVo {
 
-    public List<DetailBean> detail = new ArrayList<>();
-
     /**商品编号*/
     public String goodsNo;
     /**商品名称*/
@@ -15,6 +13,8 @@ public class CollocationEntity extends BaseResponseVo {
     public int price;
     /**商品图片*/
     public String pic;
+
+    public List<DetailBean> detail = new ArrayList<>();
 
     public static class DetailBean {
         /**商品编号*/

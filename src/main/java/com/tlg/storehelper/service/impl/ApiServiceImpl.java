@@ -70,9 +70,9 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public BaseResponseVo getGoodsBarcodeNeedRefresh(String lastModDate) {
+    public BaseResponseVo getGoodsNeedUpdate(String lastModDate) {
         BaseResponseVo responseVo = new BaseResponseVo();
-        if(erpService.getGoodsBarcodeNeedRefresh(lastModDate))
+        if(erpService.getGoodsNeedUpdate(lastModDate))
             responseVo.setSuccessfulMessage("1");
         else
             responseVo.setSuccessfulMessage("0");
@@ -136,7 +136,7 @@ public class ApiServiceImpl implements ApiService {
         for(Collocation collocation: list) {
             CollocationEntity.DetailBean detailBean = new CollocationEntity.DetailBean();
             detailBean.goodsNo = collocation.goodsNo;
-            detailBean.info = "[" + collocation.frequency + "] " + (collocation.stock<4 ? stockInfo[collocation.stock] : "stockInfo[3]");
+            detailBean.info = "推荐度：" + collocation.frequency + " [" + (collocation.stock<4 ? stockInfo[collocation.stock] : "stockInfo[3]") + "]";
             detailBean.frequency = collocation.frequency;
             detailBean.pic = collocation.pic;
             collocationEntity.detail.add(detailBean);
@@ -146,9 +146,8 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCode, String dimension, int page) {
+    public SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCode, String dimension, int page, int pageSize) {
         int recordCount = erpService.getBestSellingCount(storeCode, dimension);
-        int pageSize = 10;
         SimplePageListResponseVo<GoodsSimpleVo> responseVo = new SimplePageListResponseVo<GoodsSimpleVo>(page, (int)Math.ceil((double)recordCount/pageSize), pageSize, recordCount);
         List<BestSelling> list = erpService.getBestSelling(storeCode, dimension, pageSize, page);
         for(BestSelling bestSelling: list) {
@@ -159,17 +158,52 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public SimpleListMapResponseVo<StockVo> getStoreStock(String storeCode, String goodsNo) {
-        SimpleListMapResponseVo<StockVo> responseVo = new SimpleListMapResponseVo();
-        responseVo.map.put("goodsNo", goodsNo);
+    public SellingVo getStoreSelling(String dimension, String goodsNo, boolean includeSameStyle) {
+        SellingVo responseVo = new SellingVo();
         Goods goods = erpService.getGoods(goodsNo);
-        if(goods!=null)
-            responseVo.map.put("goodsName", goods.goodsName);
-        else
-            responseVo.map.put("goodsName", "");
-        responseVo.list.addAll(erpService.getRunsaPosStock(storeCode, goodsNo));
+        if(goods == null) {
+            responseVo.setCode(2003);
+            responseVo.setMsg("货号/条码不存在");
+            return responseVo;
+        }
+        responseVo.goodsNo = goodsNo;
+        responseVo.goodsName = goods.goodsName;
+        responseVo.price = goods.price;
+        responseVo.hasSibling = erpService.getAllGoodsNoInSameStyle(goodsNo).size() > 1;
 
-        responseVo.setSuccessfulMessage("库存获取成功");
+        erpService.getStoreSelling(dimension, goodsNo, includeSameStyle).forEach(x->{
+            SellingVo.DetailBean detailBean = new SellingVo.DetailBean(x.storeCode, x.quantity);
+            responseVo.detail.add(detailBean);
+        });
+        responseVo.setSuccessfulMessage("销售获取成功");
+        return responseVo;
+    }
+
+    @Override
+    public SimpleListResponseVo<GoodsPsiVo> getStorePsi(String storeCode, String goodsNo) {
+        SimpleListResponseVo<GoodsPsiVo> responseVo = new SimpleListResponseVo();
+        //根据goodsNo找同款的所有goodsNo
+        erpService.getAllGoodsNoInSameStyle(goodsNo).forEach(x->{
+            GoodsPsiVo goodsPsiVo;
+            Goods goods = erpService.getGoods(x);
+            if(goods!=null)
+                goodsPsiVo = new GoodsPsiVo(x, goods.goodsName, goods.styleNo, goods.colorDesc);
+            else
+                goodsPsiVo = new GoodsPsiVo(x, "", "", "");
+            List<GoodsSizePsiVo> goodsSizePsiVoList = erpService.getRunsaPosStock(storeCode, x);
+            int goodsSizePsiCount = 0;  //所有店铺无库存无销售，则排除
+            for (GoodsSizePsiVo goodsSizePsiVo_:goodsSizePsiVoList) {
+                goodsSizePsiCount += goodsSizePsiVo_.psiMap.size();
+            }
+            if(goodsSizePsiCount == 0)
+                return;
+            goodsPsiVo.goodsSizePsiList.addAll(goodsSizePsiVoList);
+            if(x.equalsIgnoreCase(goodsNo))
+                responseVo.list.add(0, goodsPsiVo);
+            else
+                responseVo.list.add(goodsPsiVo);
+        });
+        responseVo.setSuccessfulMessage("进销存获取成功");
         return responseVo;
     }
 
