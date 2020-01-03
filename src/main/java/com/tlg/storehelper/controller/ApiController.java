@@ -1,5 +1,7 @@
 package com.tlg.storehelper.controller;
 
+import com.tlg.storehelper.entity.ds1.ErpStore;
+import com.tlg.storehelper.entity.ds1.SalesSelling;
 import com.tlg.storehelper.entity.ds3.RunsaPosSales;
 import com.tlg.storehelper.entity.ds3.RunsaPosStock;
 import com.tlg.storehelper.entity.ds3.RunsaPosTransfer;
@@ -54,6 +56,11 @@ public class ApiController {
         public LoginBean() {}
     }
 
+    @RequestMapping("/api/getStoreAll")
+    public SimpleListResponseVo<ErpStore> getGoodsList(){
+        return apiService.getStoreList();
+    }
+
     @RequestMapping("/api/getGoodsNeedUpdate")
     public BaseResponseVo getGoodsNeedUpdate(String lastModDate){
         return apiService.getGoodsNeedUpdate(lastModDate);
@@ -75,18 +82,35 @@ public class ApiController {
     }
 
     @RequestMapping("/api/getCollocation")
-    public CollocationEntity getCollocation(String goodsNo){
-        return apiService.getCollocation(goodsNo);
+    public CollocationVo getCollocation(String goodsNo, String storeCodes, String dim){
+        dim = dim == null || dim.isEmpty() ? "45" : dim;
+        return apiService.getCollocation(goodsNo, storeCodes, dim);
+    }
+
+    @RequestMapping("/api/getPairCollocation")
+    public SimplePageListResponseVo<CollocationPairVo> getPairCollocation(String storeCodes, String dim, String salesCode, int page, Integer pageSize){
+        dim = dim == null || dim.isEmpty() ? "45" : dim;
+        return apiService.getPairCollocation(storeCodes, dim, salesCode, page, pageSize);
+    }
+
+    @RequestMapping("/api/getSalesList")
+    public SimpleListResponseVo<String> getSalesList(String storeCode){
+        return apiService.getSalesList(storeCode);
     }
 
     @RequestMapping("/api/getBestSelling")
-    public SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCode, String dim, int page, Integer pageSize){
-        return apiService.getBestSelling(storeCode, dim, page, pageSize==null||pageSize<10 ? 10:pageSize);
+    public SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCodes, String dim, String salesCode, int floorNumber, int page, Integer pageSize){
+        return apiService.getBestSelling(storeCodes, dim, salesCode, floorNumber, page, pageSize==null||pageSize<10 ? 10:pageSize);
     }
 
-    @RequestMapping("/api/getStoreSelling")
-    public SellingVo getStoreStock(String dim, String goodsNo, boolean includeSameStyle){
-        return apiService.getStoreSelling(dim, goodsNo, includeSameStyle);
+    @RequestMapping("/api/getBestSalesSelling")
+    public SimplePageListResponseVo<SalesSelling> getBestSalesSelling(String storeCodes, String dim, int page, Integer pageSize){
+        return apiService.getBestSalesSelling(storeCodes, dim, page, pageSize==null||pageSize<10 ? 10:pageSize);
+    }
+
+    @RequestMapping("/api/getSelling")
+    public SellingVo getSelling(String dim, String goodsNo, boolean includeSameStyle){
+        return apiService.getSelling(dim, goodsNo, includeSameStyle);
     }
 
     @RequestMapping("/api/getStorePsi")

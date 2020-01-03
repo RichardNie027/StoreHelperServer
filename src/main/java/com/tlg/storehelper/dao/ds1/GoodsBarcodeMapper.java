@@ -4,6 +4,9 @@ import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
+/**
+ * 商品条码
+ */
 public interface GoodsBarcodeMapper {
 
     /** 已废除，改用selectAllSimpleGoodsBarcodes */

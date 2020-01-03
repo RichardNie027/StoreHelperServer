@@ -132,7 +132,8 @@ public class CommonServiceImpl implements CommonService {
         try {
             OutputStream outputStream = response.getOutputStream();
             outputStream.write(bytes);
-            return null;
+            responseVo.setSuccessfulMessage("success");
+            return responseVo;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             response.reset();

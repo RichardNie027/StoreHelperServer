@@ -74,4 +74,6 @@ jasypt:
     password: tlg_it
 properties:
   erp_service:
-    resource_url: http://192.168.1.176:8081/reshelper/pre_api/query_pic/
+    goods_pic_url: http://192.168.1.176:8081/reshelper/goods/pic/
+  business_service:
+    brand_pic_url: http://192.168.1.176:8081/reshelper/brand/pic/

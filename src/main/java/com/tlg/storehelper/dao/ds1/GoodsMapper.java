@@ -5,6 +5,9 @@ import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
+/**
+ * 商品
+ */
 public interface GoodsMapper {
 
     //商品货号、商品款码、商品颜色值、商品名称、商品吊牌价、商品品牌、关联的店铺编码首字符、（创建日期 yyyy-MM-dd）

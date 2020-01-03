@@ -5,6 +5,9 @@ import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
+/**
+ * ERP用户
+ */
 public interface ErpUserMapper {
 
 //    @Select("SELECT userid,useraccount,password,type,enabled FROM regentuser where type=2 and enabled=1 order by useraccount")    //Regent

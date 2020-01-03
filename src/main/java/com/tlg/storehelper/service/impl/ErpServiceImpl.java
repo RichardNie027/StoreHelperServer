@@ -8,12 +8,11 @@ import com.tlg.storehelper.controller.ApiController;
 import com.tlg.storehelper.dao.ds1.*;
 import com.tlg.storehelper.dao.ds2.SimpleMapper;
 import com.tlg.storehelper.dao.ds3.*;
-import com.tlg.storehelper.entity.ds1.ErpUser;
-import com.tlg.storehelper.entity.ds1.Goods;
-import com.tlg.storehelper.entity.ds1.Membership;
+import com.tlg.storehelper.entity.ds1.*;
 import com.tlg.storehelper.entity.ds3.*;
 import com.tlg.storehelper.pojo.*;
 import com.tlg.storehelper.service.ErpService;
+import com.ulisesbocchio.jasyptspringboot.util.Collections;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +29,8 @@ public class ErpServiceImpl implements ErpService {
     @Autowired
     private ErpUserMapper erpUserMapper;
     @Autowired
+    private ErpStoreMapper erpStoreMapper;
+    @Autowired
     private GoodsBarcodeMapper goodsBarcodeMapper;
     @Autowired
     private GoodsMapper goodsMapper;
@@ -38,13 +39,9 @@ public class ErpServiceImpl implements ErpService {
     @Autowired
     private ShopHistoryMapper shopHistoryMapper;
     @Autowired
-    private CollocationMapper collocationMapper;
+    private SellingMapper sellingMapper;
     @Autowired
-    private BestSellingMapper bestSellingMapper;
-    @Autowired
-    private StoreSellingMapper storeSellingMapper;
-    @Autowired
-    private ErpSimpleMapper erpSimpleMapper;
+    private StockMapper stockMapper;
     @Autowired
     private SimpleMapper simpleMapper;
     @Autowired
@@ -56,8 +53,58 @@ public class ErpServiceImpl implements ErpService {
     @Autowired
     private GoodsPopularityMapper goodsPopularityMapper;
 
-    @Value("${properties.erp_service.resource_url}")
+    @Value("${properties.erp_service.goods_pic_url}")
     private String ResourceUrl;
+
+    /**逗号分隔的店编字符串，转in('','') 或 like 'x__'*/
+    private String delimiterStringToSQL(String storeCodes) {
+        String sql = "";
+        if(storeCodes.length() == 1)
+            sql = " like '" + storeCodes + "__' ";
+        else {
+            sql = " in (";
+            String codes = "";
+            for(String item: storeCodes.split(",")) {
+                if (!codes.equals(""))
+                    codes = codes + ",";
+                codes = codes + "'" + item + "'";
+            }
+            sql = sql + codes + ") ";
+        }
+        return sql;
+    }
+
+    /**逗号分隔的店编字符串，转为"长度为0"的List*/
+    private  List<String> delimiterStringToList(String storeCodes) {
+        List storeList = new ArrayList();
+        if (storeCodes != null && storeCodes.length() > 1) {
+            for (String item : storeCodes.split(","))
+                storeList.add(item);
+        }
+        return storeList;
+    }
+
+    /**默认MONTH前的日期，格式默认：yyyyMMdd*/
+    private String dimentionToDateStr(String dim) {
+        return dimentionToDateStr(dim, "yyyyMMdd");
+    }
+    /**默认MONTH前的日期*/
+    private String dimentionToDateStr(String dim, String dateFormat) {
+        dim = dim.toUpperCase();
+        int delta = Integer.MAX_VALUE;
+        try {
+            delta = Integer.parseInt(dim);
+            delta = delta > 0 ? -delta : delta;
+        } catch (NumberFormatException e) {
+            delta = dim.equals("WEEK")?-7:dim.equals("2WEEK")?-14:dim.equals("3WEEK")?-21:Integer.MAX_VALUE;
+        }
+        if(delta != Integer.MAX_VALUE)
+            return DateUtil.toStr(DateUtils.addDays(new Date(), delta), dateFormat);
+        else {
+            delta = dim.equals("MONTH")?-1:dim.equals("2MONTH")?-2:dim.equals("3MONTH")?-3:0;
+            return DateUtil.toStr(DateUtils.addMonths(new Date(), delta), dateFormat);
+        }
+    }
 
     @Override
     public List<ErpUser> getAllStoreUsers() {
@@ -67,6 +114,11 @@ public class ErpServiceImpl implements ErpService {
     @Override
     public ErpUser getUserByAccount(String userAccount) {
         return erpUserMapper.selectUserByAccount(userAccount);
+    }
+
+    @Override
+    public List<ErpStore> getAllStore() {
+        return erpStoreMapper.selectAllStore();
     }
 
     @Override
@@ -113,23 +165,106 @@ public class ErpServiceImpl implements ErpService {
     }
 
     @Override
-    public List<Collocation> getCollocation(String goodsNo) {
-        return collocationMapper.selectCollocation(goodsNo);
+    public List<Selling> getCollocation(String goodsNo, String storeCodes, String dimension) {
+        String dateFrom = dimentionToDateStr(dimension);
+        Goods goods = goodsMapper.selectGoods(goodsNo);
+        List storeList = new ArrayList();
+        storeCodes = storeCodes.length() == 1 ? "" : storeCodes;
+        if (storeCodes != null && !storeCodes.isEmpty())
+            for (String item : storeCodes.split(","))
+                storeList.add(item);
+        if (goods != null)
+            return sellingMapper.selectCollocationByStyleNo(dateFrom, goods.styleNo, storeList);
+        else
+            return new ArrayList<>();
     }
 
     @Override
-    public int getBestSellingCount(String storeCode, String dimension) {
-        return bestSellingMapper.selectBestSellingCount(dimension, storeCode.substring(0,1));
+    public int getPairCollocation(List<PairCollocation> result, String storeCodes, String dimension, String salesCode, int pageSize, int page) {
+        List<String> storeList = delimiterStringToList(storeCodes);
+        String brand = storeList.size()==0 ? storeCodes : null;
+        List<PairCollocation> list0 = sellingMapper.selectPairCollocation(dimentionToDateStr(dimension), brand, storeList, salesCode!=null && !salesCode.isEmpty() ? salesCode : null);
+        List<PairCollocation> list = list0.stream().limit(60).collect(Collectors.toList());
+        if(result == null)
+            result = new ArrayList<PairCollocation>();
+        int ceilingIdx = (page+1)*pageSize > list.size() ? list.size() : (page+1)*pageSize;
+        for(int i = page*pageSize; i<ceilingIdx; i++)
+            result.add(list.get(i));
+        return list.size();
     }
 
     @Override
-    public List<BestSelling> getBestSelling(String storeCode, String dimension, int pageSize, int page) {
-        return bestSellingMapper.selectBestSelling(dimension, storeCode.substring(0,1), pageSize, pageSize * page);
+    public int getBestSellingCount(String storeCodes, String dimension, String salesCode, int floorNumber) {
+        String dateFrom = dimentionToDateStr(dimension);
+        if(storeCodes.length() == 1)
+            return sellingMapper.selectBestSellingCount(dateFrom, storeCodes, null, salesCode, floorNumber);
+        else {
+            List storeList = new ArrayList();
+            if (storeCodes != null && !storeCodes.isEmpty())
+                for (String item : storeCodes.split(","))
+                    storeList.add(item);
+            return sellingMapper.selectBestSellingCount(dateFrom, null, storeList, salesCode, floorNumber);
+        }
     }
 
     @Override
-    public List<StoreSelling> getStoreSelling(String dimension, String goodsNo, boolean includeSameStyle) {
-        return storeSellingMapper.selectStoreSelling(dimension, goodsNo, includeSameStyle);
+    public List<Selling> getBestSelling(String storeCodes, String dimension, String salesCode, int floorNumber, int pageSize, int page) {
+        String subSQL1 = delimiterStringToSQL(storeCodes);
+        String dateFrom = dimentionToDateStr(dimension);
+        String sql = "select min(a.colthno) as goodsNo, max(b.sprice) as price, sum(a.nb) as quantity, sum(a.endprice*a.nb) as money from dbo.u2saleb a left join coloth_t b on a.colthno=b.colthno"+
+                "  where nos in (select distinct nos from dbo.u2sale where substring(cusno,2,3) "+subSQL1+
+                " and outdate >= '" + dateFrom + "') ";
+        if(salesCode != null && !salesCode.isEmpty())
+            sql = sql + " and a.salescode='" + salesCode + "' ";
+        sql = sql + " group by b.colthnob  having sum(nb)>=" + floorNumber + " order by sum(nb) desc";
+        return sellingMapper.selectBestSelling(sql, pageSize, pageSize * page);
+    }
+
+    @Override
+    public List<String> getSalesList(String storeCode) {
+        return sellingMapper.selectSalesList(storeCode);
+    }
+
+    @Override
+    public int getBestSalesSellingCount(String storeCodes, String dimension) {
+        String startDate = dimentionToDateStr(dimension);
+        if(storeCodes.length() == 1)
+            return sellingMapper.selectBestSalesSellingCount(startDate, storeCodes, null);
+        else {
+            List storeList = delimiterStringToList(storeCodes);
+            return sellingMapper.selectBestSalesSellingCount(startDate, null, storeList);
+        }
+    }
+
+    @Override
+    public List<SalesSelling> getBestSalesSelling(String storeCodes, String dimension, int pageSize, int page) {
+        String subSQL1 = delimiterStringToSQL(storeCodes);
+        String dateFrom = dimentionToDateStr(dimension);
+        String sql = "select b.salescode as salesCode,s.names as salesName,substring(a.cusno,2,3) as storeCode,db.class2 as storeLevel,count(distinct b.nos) as transactions,sum(b.nb) as quantity,sum(b.endprice*b.nb) as money,max(sch.days) as days"+
+                " from dbo.u2saleb b left join dbo.u2sale a on b.nos=a.nos"+
+                " left join zg_sales s on b.salescode=s.codes"+
+                " left join db on a.cusno=db.dbno"+
+                " left join (select dbno,empid,count(0) as days from KQ_Schedule where substring(dbno,2,3) "+subSQL1+" and eday >= '"+dateFrom+"' and eday < current_date() group by dbno,empid) sch on a.cusno=sch.dbno and b.salescode=sch.empid"+
+                "  where substring(a.cusno,2,3) "+subSQL1+
+                " and a.outdate >= '" + dateFrom + "'"+
+                " group by b.salescode,a.cusno,s.names,db.class2 having sum(b.nb)>0 and max(sch.days) > 0 order by sum(b.endprice*b.nb)/max(sch.days) desc";
+        return sellingMapper.selectBestSalesSelling(sql, pageSize, pageSize * page);
+    }
+
+    @Override
+    public List<KV<String,Integer>> getTotalStock(List<String> goodsNoList, boolean includeSameStyle) {
+        return stockMapper.selectTotalStockByStyle(goodsNoList);
+    }
+
+    @Override
+    public List<StoreSelling> getSelling(String dimension, String goodsNo, boolean includeSameStyle) {
+        String startDate = dimentionToDateStr(dimension);
+        if (includeSameStyle) {
+            Goods goods = goodsMapper.selectGoods(goodsNo);
+            String styleNo = goods != null ? goods.styleNo : "_";
+            return sellingMapper.selectStoreSellingByStyleNo(styleNo, startDate);
+        } else
+            return sellingMapper.selectStoreSellingByGoodsNo(goodsNo, startDate);
     }
 
     @Override
@@ -199,7 +334,7 @@ public class ErpServiceImpl implements ErpService {
                 vo.psiMap.put(y.dbno, new PsiVo(0,0,0, 0, y.nb));
             });
             //总仓库存
-            int _stock = erpSimpleMapper.selectWarehouseStockBySKU(goodsNo, size);
+            int _stock = stockMapper.selectWarehouseStockBySKU(goodsNo, size);
             if(_stock > 0) {
                 vo.psiMap.put("总仓", new PsiVo(0,0,0, 0, _stock));
             }

@@ -6,6 +6,9 @@ import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
+/**
+ * 会员
+ */
 public interface MembershipMapper {
 
     @Select("SELECT TOP 10 pmcode as membershipCardId, names as membershipName, telephone as mobile FROM pmmasc WHERE pmcode like #{membershipId} OR telephone like #{membershipId}")

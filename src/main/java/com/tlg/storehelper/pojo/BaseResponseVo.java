@@ -35,4 +35,9 @@ public class BaseResponseVo implements Serializable {
         this.code = 200;
         this.msg = msg;
     }
+
+    public void setCodeAndMessage(int code, String msg) {
+        this.code = code;
+        this.msg = msg;
+    }
 }

@@ -1,5 +1,7 @@
 package com.tlg.storehelper.service;
 
+import com.tlg.storehelper.entity.ds1.ErpStore;
+import com.tlg.storehelper.entity.ds1.SalesSelling;
 import com.tlg.storehelper.pojo.*;
 
 public interface ApiService {
@@ -9,6 +11,11 @@ public interface ApiService {
     /////////////////////////////////////////////////////////////
     SimpleListMapResponseVo<String> loginValidation(String username, String password);
 
+    /////////////////////////////////////////////////////////////
+    ////////////////////       Store     ////////////////////////
+    /////////////////////////////////////////////////////////////
+
+    SimpleListResponseVo<ErpStore> getStoreList();
 
     /////////////////////////////////////////////////////////////
     ////////////////////       Goods     ////////////////////////
@@ -26,17 +33,24 @@ public interface ApiService {
     /////////////////////////////////////////////////////////////
     ///////////////////    Collocation    ///////////////////////
     /////////////////////////////////////////////////////////////
-    CollocationEntity getCollocation(String goodsNo);
+    CollocationVo getCollocation(String goodsNo, String storeCodes, String dim);
+    SimplePageListResponseVo<CollocationPairVo> getPairCollocation(String storeCodes, String dimension, String salesCode, int page, int pageSize);
 
     /////////////////////////////////////////////////////////////
-    ///////////////////    BestSelling    ///////////////////////
+    ///////////////////    Sales Lady     ///////////////////////
     /////////////////////////////////////////////////////////////
-    SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCode, String dimension, int page, int pageSize);
+    SimpleListResponseVo<String> getSalesList(String storeCode);
+
+    /////////////////////////////////////////////////////////////
+    ///////////////////    Selling    ///////////////////////
+    /////////////////////////////////////////////////////////////
+    SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCodes, String dimension, String salesCode, int floorNumber, int page, int pageSize);
+    SimplePageListResponseVo<SalesSelling> getBestSalesSelling(String storeCodes, String dimension, int page, int pageSize);
 
     /////////////////////////////////////////////////////////////
     ///////////////////   StoreSelling    ///////////////////////
     /////////////////////////////////////////////////////////////
-    SellingVo getStoreSelling(String dimension, String goodsNo, boolean includeSameStyle);
+    SellingVo getSelling(String dimension, String goodsNo, boolean includeSameStyle);
 
     /////////////////////////////////////////////////////////////
     ///////////////////        PSI        ///////////////////////

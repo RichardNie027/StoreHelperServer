@@ -8,6 +8,9 @@ import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
+/**
+ * 消费记录
+ */
 public interface ShopHistoryMapper {
 
     @Select("SELECT COUNT(*) AS num FROM u2sale WHERE codes=#{membershipCardId}")
@@ -25,12 +28,12 @@ public interface ShopHistoryMapper {
             "</script>")
     List<ShopHistoryItemVo> selectShopHistoryItems(@Param("listNos") List<String> listNos);
 
-    @Select("SELECT round(isnull(SUM(now_real),0)/case when count(*)=0 then 1 else count(*) end,0) AS amount FROM dbo.u2sale WHERE codes=#{membershipCardId} AND nb>0")
+    @Select("SELECT round(isnull(SUM(now_real),0)/case when count(*)=0 then 1 else count(*) end,0) AS money FROM dbo.u2sale WHERE codes=#{membershipCardId} AND nb>0")
     int selectPerExpenditure(String membershipCardId);
 
-    @Select("SELECT isnull(SUM(now_real),0) AS amount FROM dbo.u2sale WHERE codes=#{membershipCardId} AND outdate>=#{date8From} AND outdate<=#{date8To}")
+    @Select("SELECT isnull(SUM(now_real),0) AS money FROM dbo.u2sale WHERE codes=#{membershipCardId} AND outdate>=#{date8From} AND outdate<=#{date8To}")
     int selectPeriodExpenditure(String membershipCardId, String date8From, String date8To);
 
-    @Select("SELECT isnull(SUM(points),0) AS amount FROM dbo.pmmasc_initial_points WHERE pmcode=#{membershipCardId} AND year=#{year}")
+    @Select("SELECT isnull(SUM(points),0) AS money FROM dbo.pmmasc_initial_points WHERE pmcode=#{membershipCardId} AND year=#{year}")
     int selectInitialExpenditure(String membershipCardId, int year);
 }

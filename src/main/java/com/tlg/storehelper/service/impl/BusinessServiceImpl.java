@@ -1,7 +1,10 @@
 package com.tlg.storehelper.service.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 import com.nec.lib.utils.BeanUtil;
 import com.nec.lib.utils.DateUtil;
+import com.nec.lib.utils.NetUtil;
 import com.nec.lib.utils.XxteaUtil;
 import com.tlg.storehelper.dao.ds2.InventoryDetailMapper;
 import com.tlg.storehelper.dao.ds2.InventoryMapper;
@@ -10,12 +13,15 @@ import com.tlg.storehelper.dao.ds2.SimpleMapper;
 import com.tlg.storehelper.entity.ds2.Inventory;
 import com.tlg.storehelper.entity.ds2.InventoryDetail;
 import com.tlg.storehelper.entity.ds2.LoginMgr;
+import com.tlg.storehelper.pojo.BaseResponseVo;
 import com.tlg.storehelper.pojo.InventoryEntity;
+import com.tlg.storehelper.pojo.SimpleListResponseVo;
 import com.tlg.storehelper.service.BusinessService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +45,9 @@ public class BusinessServiceImpl implements BusinessService {
     private LoginMgrMapper loginMgrMapper;
     @Autowired
     private SimpleMapper simpleMapper;
+
+    @Value("${properties.business_service.brand_pic_url}")
+    private String ResourceUrl;
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -84,6 +93,33 @@ public class BusinessServiceImpl implements BusinessService {
         }
         logger.info("上传盘点单完成");
         return "";
+    }
+
+    @Override
+    public Map<String, Integer> getBrandPicsCountByVer(String brandKey) {
+        Map<String, Integer> result = new LinkedTreeMap<>();
+        List<String> list = simpleMapper.selectBrandPics(brandKey);
+        if (list != null) {
+            list.forEach(x->{
+                String[] arr = x.split("\\|");
+                int picVer = Integer.parseInt(arr[1]);
+                int picCount = arr[2].split(",").length;
+                result.put(arr[0], picVer * 1000 + picCount);
+            });
+        }
+        return result;
+    }
+
+    @Override
+    public boolean queryBrandPicture(String brandKey, String type, long idx) {
+        String resp = NetUtil.request(ResourceUrl + brandKey + "/" + type + "/" + idx, null, "GET", "json");
+        BaseResponseVo responseVo = new Gson().fromJson(resp, BaseResponseVo.class);
+        return responseVo != null && responseVo.code == 200;
+    }
+
+    @Override
+    public String getBrandHtml(String brandKey, String type) {
+        return simpleMapper.selectHtml(brandKey, type);
     }
 
     @Override

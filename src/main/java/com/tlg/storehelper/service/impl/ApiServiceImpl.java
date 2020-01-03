@@ -1,10 +1,7 @@
 package com.tlg.storehelper.service.impl;
 
 import com.nec.lib.utils.StringUtil;
-import com.tlg.storehelper.entity.ds1.ErpUser;
-import com.tlg.storehelper.entity.ds1.Goods;
-import com.tlg.storehelper.entity.ds3.BestSelling;
-import com.tlg.storehelper.entity.ds3.Collocation;
+import com.tlg.storehelper.entity.ds1.*;
 import com.tlg.storehelper.pojo.*;
 import com.tlg.storehelper.service.ApiService;
 import com.tlg.storehelper.service.BusinessService;
@@ -12,7 +9,9 @@ import com.tlg.storehelper.service.ErpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ApiServiceImpl implements ApiService {
@@ -70,6 +69,17 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
+    public SimpleListResponseVo<ErpStore> getStoreList() {
+        SimpleListResponseVo<ErpStore> responseVo = new SimpleListResponseVo<>();
+        responseVo.list.addAll(erpService.getAllStore());
+        if(responseVo.list.size() > 0)
+            responseVo.setSuccessfulMessage("门店清单获取成功");
+        else
+            responseVo.setCodeAndMessage(2003, "未取得门店清单");
+        return responseVo;
+    }
+
+    @Override
     public BaseResponseVo getGoodsNeedUpdate(String lastModDate) {
         BaseResponseVo responseVo = new BaseResponseVo();
         if(erpService.getGoodsNeedUpdate(lastModDate))
@@ -118,47 +128,92 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public CollocationEntity getCollocation(String goodsNo) {
-        final String[] stockInfo = new String[]{"无","少","有","多"};
+    public CollocationVo getCollocation(String goodsNo, String storeCodes, String dim) {
         Goods goods = erpService.getGoods(goodsNo);
-        CollocationEntity collocationEntity = new CollocationEntity();
+        CollocationVo collocationVo = new CollocationVo();
         if(goods == null) {
-            collocationEntity.setCode(2003);
-            collocationEntity.setMsg("货号/条码不存在");
-            return collocationEntity;
+            collocationVo.setCode(2003);
+            collocationVo.setMsg("货号/条码不存在");
+            return collocationVo;
         }
-        collocationEntity.goodsNo = goodsNo;
-        collocationEntity.goodsName = goods.goodsName;
-        collocationEntity.price = goods.price;
-        collocationEntity.pic = goods.pic;
+        collocationVo.goods = new GoodsSimpleVo(goodsNo,goods.goodsName,goods.price,0,0,"");
 
-        List<Collocation> list = erpService.getCollocation(goodsNo);
-        for(Collocation collocation: list) {
-            CollocationEntity.DetailBean detailBean = new CollocationEntity.DetailBean();
-            detailBean.goodsNo = collocation.goodsNo;
-            detailBean.info = "推荐度：" + collocation.frequency + " [" + (collocation.stock<4 ? stockInfo[collocation.stock] : "stockInfo[3]") + "]";
-            detailBean.frequency = collocation.frequency;
-            detailBean.pic = collocation.pic;
-            collocationEntity.detail.add(detailBean);
-        }
-        collocationEntity.setSuccessfulMessage("搭配获取成功");
-        return collocationEntity;
+        List<Selling> list = erpService.getCollocation(goodsNo, storeCodes, dim);
+        List<String> goodsNoList = list.stream().limit(24).map(selling -> selling.goodsNo).collect(Collectors.toList());
+        List<KV<String,Integer>> stockList = erpService.getTotalStock(goodsNoList, true);
+        list.stream().limit(24).forEach(selling -> {
+            KV<String,Integer> vo = stockList.stream().filter(kv->kv.k.equalsIgnoreCase(selling.goodsNo)).findFirst().get();
+            GoodsSimpleVo detailBean = new GoodsSimpleVo(selling.goodsNo,"",selling.price,selling.quantity,vo!=null?vo.v:0,"");
+            collocationVo.detail.add(detailBean);
+        });
+        collocationVo.setSuccessfulMessage("搭配获取成功");
+        return collocationVo;
     }
 
     @Override
-    public SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCode, String dimension, int page, int pageSize) {
-        int recordCount = erpService.getBestSellingCount(storeCode, dimension);
+    public SimplePageListResponseVo<CollocationPairVo> getPairCollocation(String storeCodes, String dimension, String salesCode, int page, int pageSize) {
+        List<PairCollocation> list = new ArrayList<>();
+        int recordCount = erpService.getPairCollocation(list, storeCodes, dimension, salesCode, pageSize, page);
+        SimplePageListResponseVo<CollocationPairVo> responseVo = new SimplePageListResponseVo<CollocationPairVo>(page, (int)Math.ceil((double)recordCount/pageSize), pageSize, recordCount);
+        List<String> goodsNoList = list.stream().map(pair -> pair.goodsNo1).collect(Collectors.toList());
+        List<String> goodsNoList2 = list.stream().map(pair -> pair.goodsNo2).collect(Collectors.toList());
+        goodsNoList.addAll(goodsNoList2);
+        List<String> goodsNoListAll = goodsNoList.parallelStream().distinct().collect(Collectors.toList());
+        List<KV<String,Integer>> stockList = erpService.getTotalStock(goodsNoListAll, true);
+        list.stream().forEach(pair -> {
+            CollocationPairVo pairVo = new CollocationPairVo();
+            KV<String,Integer> vo1 = stockList.stream().filter(kv->kv.k.equalsIgnoreCase(pair.goodsNo1)).findFirst().get();
+            KV<String,Integer> vo2 = stockList.stream().filter(kv->kv.k.equalsIgnoreCase(pair.goodsNo2)).findFirst().get();
+            pairVo.goods1 = new GoodsSimpleVo(pair.goodsNo1, "", pair.price1, 0, vo1!=null?vo1.v:0, "");
+            pairVo.goods2 = new GoodsSimpleVo(pair.goodsNo2, "", pair.price2, 0, vo2!=null?vo2.v:0, "");
+            pairVo.frequency = pair.quantity;
+            responseVo.list.add(pairVo);
+        });
+        responseVo.setSuccessfulMessage("盟店搭配获取成功");
+        return responseVo;
+    }
+
+    @Override
+    public SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCodes, String dimension, String salesCode, int floorNumber, int page, int pageSize) {
+        int recordCount = erpService.getBestSellingCount(storeCodes, dimension, salesCode, floorNumber);
         SimplePageListResponseVo<GoodsSimpleVo> responseVo = new SimplePageListResponseVo<GoodsSimpleVo>(page, (int)Math.ceil((double)recordCount/pageSize), pageSize, recordCount);
-        List<BestSelling> list = erpService.getBestSelling(storeCode, dimension, pageSize, page);
-        for(BestSelling bestSelling: list) {
-            responseVo.list.add(new GoodsSimpleVo(bestSelling.goodsNo, "", bestSelling.price, String.valueOf(bestSelling.quantity), bestSelling.pic));
-        }
+        List<Selling> list = erpService.getBestSelling(storeCodes, dimension, salesCode, floorNumber, pageSize, page);
+        List<String> goodsNoList = new ArrayList<>();
+        list.forEach(selling -> {
+            goodsNoList.add(selling.goodsNo);
+        });
+        List<KV<String, Integer>> stockList = erpService.getTotalStock(goodsNoList, true);
+        list.forEach(selling -> {
+            int stock = 0;
+            for(KV<String, Integer> kv : stockList.stream().filter(f->f.k.equals(selling.goodsNo)).collect(Collectors.toList())) {
+                stock = kv.v.intValue();
+            }
+            responseVo.list.add(new GoodsSimpleVo(selling.goodsNo, "", selling.price, selling.quantity, stock, ""));
+        });
         responseVo.setSuccessfulMessage("畅销款获取成功");
         return responseVo;
     }
 
     @Override
-    public SellingVo getStoreSelling(String dimension, String goodsNo, boolean includeSameStyle) {
+    public SimpleListResponseVo<String> getSalesList(String storeCode) {
+        SimpleListResponseVo<String> responseVo = new SimpleListResponseVo<String>();
+        responseVo.list = erpService.getSalesList(storeCode);
+        responseVo.setSuccessfulMessage("导购列表获取成功");
+        return responseVo;
+    }
+
+    @Override
+    public SimplePageListResponseVo<SalesSelling> getBestSalesSelling(String storeCodes, String dimension, int page, int pageSize) {
+        int recordCount = erpService.getBestSalesSellingCount(storeCodes, dimension);
+        SimplePageListResponseVo<SalesSelling> responseVo = new SimplePageListResponseVo<>(page, (int)Math.ceil((double)recordCount/pageSize), pageSize, recordCount);
+        List<SalesSelling> list = erpService.getBestSalesSelling(storeCodes, dimension, pageSize, page);
+        responseVo.list.addAll(list);
+        responseVo.setSuccessfulMessage("导购销售排名获取成功");
+        return responseVo;
+    }
+
+    @Override
+    public SellingVo getSelling(String dimension, String goodsNo, boolean includeSameStyle) {
         SellingVo responseVo = new SellingVo();
         Goods goods = erpService.getGoods(goodsNo);
         if(goods == null) {
@@ -171,7 +226,7 @@ public class ApiServiceImpl implements ApiService {
         responseVo.price = goods.price;
         responseVo.hasSibling = erpService.getAllGoodsNoInSameStyle(goodsNo).size() > 1;
 
-        erpService.getStoreSelling(dimension, goodsNo, includeSameStyle).forEach(x->{
+        erpService.getSelling(dimension, goodsNo, includeSameStyle).forEach(x->{
             SellingVo.DetailBean detailBean = new SellingVo.DetailBean(x.storeCode, x.quantity);
             responseVo.detail.add(detailBean);
         });
