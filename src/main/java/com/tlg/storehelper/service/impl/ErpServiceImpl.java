@@ -12,13 +12,13 @@ import com.tlg.storehelper.entity.ds1.*;
 import com.tlg.storehelper.entity.ds3.*;
 import com.tlg.storehelper.pojo.*;
 import com.tlg.storehelper.service.ErpService;
-import com.ulisesbocchio.jasyptspringboot.util.Collections;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -107,8 +107,17 @@ public class ErpServiceImpl implements ErpService {
     }
 
     @Override
-    public List<ErpUser> getAllStoreUsers() {
-        return erpUserMapper.selectAllStoreUsers();
+    public List<ErpUser> getStoreUsersInAuthorization(String storeCondition) {
+        if(storeCondition.isEmpty())
+            return erpUserMapper.selectStoreUsersInAuthorization(null, null);
+        else if(storeCondition.indexOf("%") != -1) {
+            return erpUserMapper.selectStoreUsersInAuthorization(storeCondition, null);
+        } else {
+            String[] codesArray = storeCondition.split(",");
+            List<String> storeCodes = new ArrayList<>(codesArray.length);
+            Collections.addAll(storeCodes, codesArray);
+            return erpUserMapper.selectStoreUsersInAuthorization(null, storeCodes);
+        }
     }
 
     @Override
@@ -140,6 +149,11 @@ public class ErpServiceImpl implements ErpService {
     @Override
     public List<String> getAllGoodsNoInSameStyle(String goodsNo) {
         return goodsMapper.selectGoodsNoInSameStyle(goodsNo);
+    }
+
+    @Override
+    public List<KV<String, Integer>> getGoodsNumberInSameStyle(List<String> goodsNoList) {
+        return goodsMapper.selectGoodsNumberInSameStyle(goodsNoList);
     }
 
     @Override
@@ -208,15 +222,20 @@ public class ErpServiceImpl implements ErpService {
     }
 
     @Override
-    public List<Selling> getBestSelling(String storeCodes, String dimension, String salesCode, int floorNumber, int pageSize, int page) {
+    public List<Selling> getBestSelling(String storeCodes, String dimension, String salesCode, int floorNumber, String sort, int pageSize, int page) {
         String subSQL1 = delimiterStringToSQL(storeCodes);
         String dateFrom = dimentionToDateStr(dimension);
+        sort = sort==null || sort.length()==0 ? "SALES" : sort;
+        if(sort.equalsIgnoreCase("PRICE"))
+            sort = " order by max(b.sprice) desc,sum(nb) desc";
+        else
+            sort = " order by sum(nb) desc,max(b.sprice) desc";
         String sql = "select min(a.colthno) as goodsNo, max(b.sprice) as price, sum(a.nb) as quantity, sum(a.endprice*a.nb) as money from dbo.u2saleb a left join coloth_t b on a.colthno=b.colthno"+
                 "  where nos in (select distinct nos from dbo.u2sale where substring(cusno,2,3) "+subSQL1+
                 " and outdate >= '" + dateFrom + "') ";
         if(salesCode != null && !salesCode.isEmpty())
             sql = sql + " and a.salescode='" + salesCode + "' ";
-        sql = sql + " group by b.colthnob  having sum(nb)>=" + floorNumber + " order by sum(nb) desc";
+        sql = sql + " group by b.colthnob  having sum(nb)>=" + floorNumber + sort;
         return sellingMapper.selectBestSelling(sql, pageSize, pageSize * page);
     }
 

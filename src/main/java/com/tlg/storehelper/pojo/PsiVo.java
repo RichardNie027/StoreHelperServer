@@ -1,6 +1,8 @@
 package com.tlg.storehelper.pojo;
 
-public class PsiVo {
+import java.io.Serializable;
+
+public class PsiVo implements Serializable {
     /**收货 receiving*/
     public int r;
     /**发货 delivery*/

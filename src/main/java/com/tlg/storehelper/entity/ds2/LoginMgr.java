@@ -1,6 +1,8 @@
 package com.tlg.storehelper.entity.ds2;
 
-public class LoginMgr {
+import java.io.Serializable;
+
+public class LoginMgr implements Serializable {
 
     public String username;
     public String tokenKey;

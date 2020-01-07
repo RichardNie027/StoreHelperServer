@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-public class InventoryEntity  implements Serializable {
+public class InventoryEntity implements Serializable {
 
     public List<DetailBean> detail = new ArrayList<>();
 

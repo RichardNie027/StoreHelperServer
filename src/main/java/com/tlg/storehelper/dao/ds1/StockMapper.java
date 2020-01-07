@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
+@CacheNamespace(readWrite = true, flushInterval = 60000)
 public interface StockMapper {
 
     /**总仓SKU库存*/

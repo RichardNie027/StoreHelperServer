@@ -123,8 +123,8 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     @Override
-    public boolean checkUserExist(String jobNumber, String id6) {
-        return simpleMapper.checkUserExist(jobNumber, id6) > 0;
+    public String checkUserRights(String jobNumber, String id6) {
+        return simpleMapper.checkUserRights(jobNumber, id6);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.tlg.storehelper.pojo;
 
-public class KV<K,V> {
+import java.io.Serializable;
+
+public class KV<K,V> implements Serializable {
     public K k;
     public V v;
 

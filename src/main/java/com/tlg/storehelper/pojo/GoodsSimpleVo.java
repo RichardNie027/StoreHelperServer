@@ -18,13 +18,19 @@ public class GoodsSimpleVo implements Serializable {
     public int stock;
     /**其它信息*/
     public String info;
+    /**同款商品数*/
+    public int sameStyleCount;
+    /**同款货号，逗号分隔*/
+    public String sameStyleGoodsNos;
 
-    public GoodsSimpleVo(String goodsNo, String goodsName, int price, int sales, int stock, String info) {
+    public GoodsSimpleVo(String goodsNo, String goodsName, int price, int sales, int stock, String info, int sameStyleCount, String sameStyleGoodsNos) {
         this.goodsNo = goodsNo;
         this.goodsName = goodsName;
         this.price = price;
         this.sales = sales;
         this.stock = stock;
         this.info = info;
+        this.sameStyleCount = sameStyleCount;
+        this.sameStyleGoodsNos = sameStyleGoodsNos;
     }
 }

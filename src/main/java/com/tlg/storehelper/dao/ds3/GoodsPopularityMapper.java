@@ -1,10 +1,12 @@
 package com.tlg.storehelper.dao.ds3;
 
 import com.tlg.storehelper.pojo.GoodsPopularityVo;
+import org.apache.ibatis.annotations.CacheNamespace;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
+@CacheNamespace(readWrite = false, flushInterval = 600000)
 public interface GoodsPopularityMapper {
 
     String TABLE = "OA.dbo.RunsaProductPopularity";

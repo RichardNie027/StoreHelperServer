@@ -99,8 +99,8 @@ public class ApiController {
     }
 
     @RequestMapping("/api/getBestSelling")
-    public SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCodes, String dim, String salesCode, int floorNumber, int page, Integer pageSize){
-        return apiService.getBestSelling(storeCodes, dim, salesCode, floorNumber, page, pageSize==null||pageSize<10 ? 10:pageSize);
+    public SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCodes, String dim, String salesCode, int floorNumber, String sort, int page, Integer pageSize){
+        return apiService.getBestSelling(storeCodes, dim, salesCode, floorNumber, sort, page, pageSize==null||pageSize<10 ? 10:pageSize);
     }
 
     @RequestMapping("/api/getBestSalesSelling")

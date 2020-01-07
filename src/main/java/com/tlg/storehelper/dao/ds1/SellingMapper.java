@@ -4,11 +4,14 @@ import com.tlg.storehelper.entity.ds1.PairCollocation;
 import com.tlg.storehelper.entity.ds1.SalesSelling;
 import com.tlg.storehelper.entity.ds1.Selling;
 import com.tlg.storehelper.entity.ds1.StoreSelling;
+import org.apache.ibatis.annotations.CacheNamespace;
+import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
+@CacheNamespace(readWrite = true, flushInterval = 60000)
 public interface SellingMapper {
 
     /**按货号查询所有店铺的销售*/
@@ -18,6 +21,10 @@ public interface SellingMapper {
     /**按款号查询所有店铺的销售*/
     @Select("select substring(a.cusno,2,3) as storeCode, sum(b.nb) as quantity from u2sale a left join u2saleb b on a.nos = b.nos left join coloth_t t on b.colthno=t.colthno where t.colthnob=#{styleNo} and a.outdate>=#{startDate8} and b.nb>0 group by a.cusno having sum(b.nb)>0 order by sum(b.nb) desc")
     List<StoreSelling> selectStoreSellingByStyleNo(String styleNo, String startDate8);
+
+    /** 导购列表 */
+    @Select("select codes+' '+names from zg_sales where substring(dbno,2,3)=#{storeCode} order by codes")
+    List<String> selectSalesList(String storeCode);
 
     /** 销售排行（畅销款）——总数；brand 和 storeCodes 二选一，不选设null*/
     @Select("<script> SELECT COUNT(count(0)) AS num FROM dbo.u2saleb a LEFT JOIN coloth_t b ON a.colthno=b.colthno" +
@@ -39,10 +46,6 @@ public interface SellingMapper {
             "  having sum(nb)>=#{floorNumber}"+
             "</script>")
     int selectBestSellingCount(String startDate, String brand, @Param("storeCodes")List<String> storeCodes, String salesCode, int floorNumber);
-
-    /** 导购列表 */
-    @Select("select codes+' '+names from zg_sales where substring(dbno,2,3)=#{storeCode} order by codes")
-    List<String> selectSalesList(String storeCode);
 
     //    @Select("SELECT TOP #{pageSize} dim,brand,goodsNo,t2.sprice as price,quantity FROM " + TABLE + " t1 LEFT JOIN OA.dbo.RUNSA_Coloth_t t2 ON t1.goodsNo=t2.colthno WHERE dim=#{dim} AND brand=#{brand} AND goodsNo NOT IN (SELECT TOP #{start} goodsNo FROM " + TABLE + " WHERE dim=#{dim} AND brand=#{brand} ORDER BY quantity DESC,goodsNo) ORDER BY quantity DESC,goodsNo")
     /** 销售排行（畅销款）——分页结果，start起始序号为pageSize * page */

@@ -3,6 +3,7 @@ package com.tlg.storehelper.dao.ds1;
 import com.tlg.storehelper.entity.ds1.Membership;
 import com.tlg.storehelper.pojo.ShopHistoryItemVo;
 import com.tlg.storehelper.pojo.ShopHistoryVo;
+import org.apache.ibatis.annotations.CacheNamespace;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -11,6 +12,7 @@ import java.util.List;
 /**
  * 消费记录
  */
+@CacheNamespace(readWrite = true, flushInterval = 60000)
 public interface ShopHistoryMapper {
 
     @Select("SELECT COUNT(*) AS num FROM u2sale WHERE codes=#{membershipCardId}")

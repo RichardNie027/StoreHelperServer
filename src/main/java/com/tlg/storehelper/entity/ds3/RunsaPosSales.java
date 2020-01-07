@@ -1,6 +1,8 @@
 package com.tlg.storehelper.entity.ds3;
 
-public class RunsaPosSales {
+import java.io.Serializable;
+
+public class RunsaPosSales implements Serializable {
     public String cusno;        //店编
     public String nos;          //单号
     public String nos_rec;      //单据流水号

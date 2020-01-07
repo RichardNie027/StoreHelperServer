@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface ErpService {
 
-    List<ErpUser> getAllStoreUsers();
+    List<ErpUser> getStoreUsersInAuthorization(String storeCondition);
 
     ErpUser getUserByAccount(String userAccount);
 
@@ -24,6 +24,9 @@ public interface ErpService {
     List<String> getAllSimpleGoods(String lastModDate);
 
     List<String> getAllGoodsNoInSameStyle(String goodsNo);
+
+    /**返回每个货号的同款商品数*/
+    List<KV<String,Integer>> getGoodsNumberInSameStyle(List<String> goodsNoList);
 
     Goods getGoods(String goodsNo);
 
@@ -63,7 +66,7 @@ public interface ErpService {
      * @param salesCode 导购工号，可为null/empty
      * @param floorNumber 最小的销量统计
      */
-    List<Selling> getBestSelling(String storeCodes, String dimension, String salesCode, int floorNumber, int pageSize, int page);
+    List<Selling> getBestSelling(String storeCodes, String dimension, String salesCode, int floorNumber, String sort, int pageSize, int page);
 
     /**
      * 导购列表

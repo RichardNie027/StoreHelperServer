@@ -1,6 +1,8 @@
 package com.tlg.storehelper.entity.ds1;
 
-public class ErpStore {
+import java.io.Serializable;
+
+public class ErpStore implements Serializable {
 
     public String storeCode;
     public String storeLevel;

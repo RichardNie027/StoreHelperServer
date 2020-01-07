@@ -1,11 +1,13 @@
 package com.tlg.storehelper.controller;
 
 import com.nec.lib.utils.RedisUtil;
+import com.tlg.storehelper.entity.ds1.ErpStore;
 import com.tlg.storehelper.pojo.BaseResponseVo;
 import com.tlg.storehelper.pojo.SimpleListResponseVo;
 import com.tlg.storehelper.pojo.SimpleMapResponseVo;
 import com.tlg.storehelper.service.BusinessService;
 import com.tlg.storehelper.service.CommonService;
+import com.tlg.storehelper.service.ErpService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +19,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -26,6 +29,8 @@ public class H5Controller {
     private BusinessService businessService;
     @Autowired
     private CommonService commonService;
+    @Autowired
+    private ErpService erpService;
 
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
@@ -38,6 +43,9 @@ public class H5Controller {
         else {
             Map<String, Integer> map = businessService.getBrandPicsCountByVer(brandKey);
             vo.map.putAll(map);
+            List<ErpStore> allStoreList = erpService.getAllStore();
+            long storeCountInBrand = allStoreList.stream().filter(x->x.storeCode.substring(0,1).equals(brandKey)).count();
+            vo.map.put("storeCountInBrand", storeCountInBrand);
             vo.setSuccessfulMessage("success");
         }
         return vo;

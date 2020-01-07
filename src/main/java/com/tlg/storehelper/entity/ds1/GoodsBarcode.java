@@ -1,9 +1,10 @@
 package com.tlg.storehelper.entity.ds1;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Deprecated
-public class GoodsBarcode {
+public class GoodsBarcode implements Serializable {
 
     public String id;
     public String brand;

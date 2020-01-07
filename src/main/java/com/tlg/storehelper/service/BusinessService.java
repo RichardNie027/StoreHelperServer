@@ -28,7 +28,14 @@ public interface BusinessService {
 
     String getBrandHtml(String brandKey, String type);
 
-    boolean checkUserExist(String jobNumber, String id6);
+    /**
+     * 检查用户名密码正确，返回检查结果及有权限的店编、权限码
+     * @param jobNumber
+     * @param id6
+     * @return A|B|C, 用户名密码正确A=1 不正确A=0, B=SQL IN 子句或 LIKE 子句, C=2位一节的权限码
+     * C：他店（单品精准库存K0，单品精准销量X0，客单数X1，客单件X2，单品精准销售金额X5，客单价X6）
+     */
+    String checkUserRights(String jobNumber, String id6);
     String getStoreDynamicPwd(String storeCode);
     String getStoreDynamicPwd(String storeCode, String ip);
 

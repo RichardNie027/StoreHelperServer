@@ -1,5 +1,6 @@
 package com.tlg.storehelper.service.impl;
 
+import com.nec.lib.utils.ArrayUtil;
 import com.nec.lib.utils.StringUtil;
 import com.tlg.storehelper.entity.ds1.*;
 import com.tlg.storehelper.pojo.*;
@@ -23,8 +24,12 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public SimpleListMapResponseVo<String> loginValidation(String username, String password) {
+        String baseAppRights = "X0X1X2";    //基本权限
         SimpleListMapResponseVo<String> responseVo = new SimpleListMapResponseVo();
+        responseVo.map.put("minStockRatio", 2.0);   //正常库存下限，低于为库存少   vs 同款库存数/店数/同款货号数
+        responseVo.map.put("maxStockRatio", 9.0);   //正常库存上限，高于为库存多   vs 同款库存数/店数/同款货号数
         ErpUser user = null;
+        String storeCondition = ""; //授权店铺（店编与门店用户名相同）
         if(username!=null && password!=null) {
             try {
                 //password = XxteaUtil.encryptBase64String(password, "UTF-8", "Passwd-Regent");
@@ -32,7 +37,10 @@ public class ApiServiceImpl implements ApiService {
                 e.printStackTrace();
             }
             if(username.length() == 6 && StringUtil.isNumeric(username)) {  //员工编号
-                if(businessService.checkUserExist(username, password)) {
+                String[] checkResults = businessService.checkUserRights(username, password).split("\\|");//分组的最后字符串为空，数组成员2个
+                //A|B|C, 用户名密码正确A=1 不正确A=0, B=SQL IN 子句或 LIKE 子句, C=2位一节的权限码
+                //C：他店（单品精准库存K0，单品精准销量X0，客单数X1，客单件X2，单品精准销售金额X5，客单价X6）
+                if(checkResults[0].equals("1")) {
                     user = new ErpUser();
                     user.userAccount = username;
                     user.username = username;
@@ -40,6 +48,8 @@ public class ApiServiceImpl implements ApiService {
                     user.enabled = 1;
                     user.password = password;
                     user.type = 1;
+                    storeCondition = checkResults[1];
+                    responseVo.map.put("appRights", baseAppRights+(checkResults.length<3?"":checkResults[2]));
                 }
             } else {  //店铺账号
                 String pwd = businessService.getStoreDynamicPwd(username);
@@ -50,10 +60,16 @@ public class ApiServiceImpl implements ApiService {
             }
         }
         if(user != null && user.password.equals(password)) {
-            if(user.type == 2)
+            if(storeCondition.isEmpty()) {
+                responseVo.code = 1005;
+                responseVo.msg = "用户无授权门店";
+                return responseVo;
+            }
+            if(user.type == 2) {
                 responseVo.list.add(user.userAccount);
-            else {
-                for(ErpUser eachUser: erpService.getAllStoreUsers()) {
+                responseVo.map.put("appRights", baseAppRights);    //默认基本权限：它店单品精准销量/客单数/客单件
+            } else {
+                for(ErpUser eachUser: erpService.getStoreUsersInAuthorization(storeCondition)) {
                     if(eachUser.userAccount.length() == 3)
                         responseVo.list.add(eachUser.userAccount);
                 }
@@ -136,14 +152,20 @@ public class ApiServiceImpl implements ApiService {
             collocationVo.setMsg("货号/条码不存在");
             return collocationVo;
         }
-        collocationVo.goods = new GoodsSimpleVo(goodsNo,goods.goodsName,goods.price,0,0,"");
+        collocationVo.goods = new GoodsSimpleVo(goodsNo,goods.goodsName,goods.price,0,0,"", 1, "");
 
         List<Selling> list = erpService.getCollocation(goodsNo, storeCodes, dim);
         List<String> goodsNoList = list.stream().limit(24).map(selling -> selling.goodsNo).collect(Collectors.toList());
+        goodsNoList.add(goodsNo);
         List<KV<String,Integer>> stockList = erpService.getTotalStock(goodsNoList, true);
+        List<KV<String,Integer>> numberList = erpService.getGoodsNumberInSameStyle(goodsNoList);
+        KV<String,Integer> kv0 = numberList.stream().filter(kv->kv.k.equals(goodsNo)).findFirst().get();
+        if(kv0 != null)
+            collocationVo.goods.sameStyleCount = kv0.v;
         list.stream().limit(24).forEach(selling -> {
-            KV<String,Integer> vo = stockList.stream().filter(kv->kv.k.equalsIgnoreCase(selling.goodsNo)).findFirst().get();
-            GoodsSimpleVo detailBean = new GoodsSimpleVo(selling.goodsNo,"",selling.price,selling.quantity,vo!=null?vo.v:0,"");
+            KV<String,Integer> vo1 = stockList.stream().filter(kv->kv.k.equalsIgnoreCase(selling.goodsNo)).findFirst().get();
+            KV<String,Integer> vo2 = numberList.stream().filter(kv->kv.k.equalsIgnoreCase(selling.goodsNo)).findFirst().get();
+            GoodsSimpleVo detailBean = new GoodsSimpleVo(selling.goodsNo,"",selling.price,selling.quantity,vo1!=null?vo1.v:0,"", vo2.v, "");
             collocationVo.detail.add(detailBean);
         });
         collocationVo.setSuccessfulMessage("搭配获取成功");
@@ -160,12 +182,15 @@ public class ApiServiceImpl implements ApiService {
         goodsNoList.addAll(goodsNoList2);
         List<String> goodsNoListAll = goodsNoList.parallelStream().distinct().collect(Collectors.toList());
         List<KV<String,Integer>> stockList = erpService.getTotalStock(goodsNoListAll, true);
+        List<KV<String,Integer>> numberList = erpService.getGoodsNumberInSameStyle(goodsNoList);
         list.stream().forEach(pair -> {
             CollocationPairVo pairVo = new CollocationPairVo();
             KV<String,Integer> vo1 = stockList.stream().filter(kv->kv.k.equalsIgnoreCase(pair.goodsNo1)).findFirst().get();
             KV<String,Integer> vo2 = stockList.stream().filter(kv->kv.k.equalsIgnoreCase(pair.goodsNo2)).findFirst().get();
-            pairVo.goods1 = new GoodsSimpleVo(pair.goodsNo1, "", pair.price1, 0, vo1!=null?vo1.v:0, "");
-            pairVo.goods2 = new GoodsSimpleVo(pair.goodsNo2, "", pair.price2, 0, vo2!=null?vo2.v:0, "");
+            KV<String,Integer> vo1b = numberList.stream().filter(kv->kv.k.equalsIgnoreCase(pair.goodsNo1)).findFirst().get();
+            KV<String,Integer> vo2b = numberList.stream().filter(kv->kv.k.equalsIgnoreCase(pair.goodsNo2)).findFirst().get();
+            pairVo.goods1 = new GoodsSimpleVo(pair.goodsNo1, "", pair.price1, 0, vo1!=null?vo1.v:0, "", vo1b!=null?vo1b.v:0, "");
+            pairVo.goods2 = new GoodsSimpleVo(pair.goodsNo2, "", pair.price2, 0, vo2!=null?vo2.v:0, "", vo2b!=null?vo2b.v:0, "");
             pairVo.frequency = pair.quantity;
             responseVo.list.add(pairVo);
         });
@@ -174,21 +199,20 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCodes, String dimension, String salesCode, int floorNumber, int page, int pageSize) {
+    public SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCodes, String dimension, String salesCode, int floorNumber, String sort, int page, int pageSize) {
         int recordCount = erpService.getBestSellingCount(storeCodes, dimension, salesCode, floorNumber);
         SimplePageListResponseVo<GoodsSimpleVo> responseVo = new SimplePageListResponseVo<GoodsSimpleVo>(page, (int)Math.ceil((double)recordCount/pageSize), pageSize, recordCount);
-        List<Selling> list = erpService.getBestSelling(storeCodes, dimension, salesCode, floorNumber, pageSize, page);
+        List<Selling> list = erpService.getBestSelling(storeCodes, dimension, salesCode, floorNumber, sort, pageSize, page);
         List<String> goodsNoList = new ArrayList<>();
         list.forEach(selling -> {
             goodsNoList.add(selling.goodsNo);
         });
         List<KV<String, Integer>> stockList = erpService.getTotalStock(goodsNoList, true);
-        list.forEach(selling -> {
-            int stock = 0;
-            for(KV<String, Integer> kv : stockList.stream().filter(f->f.k.equals(selling.goodsNo)).collect(Collectors.toList())) {
-                stock = kv.v.intValue();
-            }
-            responseVo.list.add(new GoodsSimpleVo(selling.goodsNo, "", selling.price, selling.quantity, stock, ""));
+        List<KV<String,Integer>> numberList = erpService.getGoodsNumberInSameStyle(goodsNoList);
+        list.stream().forEach(selling -> {
+            KV<String,Integer> vo1 = stockList.stream().filter(kv->kv.k.equalsIgnoreCase(selling.goodsNo)).findFirst().get();
+            KV<String,Integer> vo2 = numberList.stream().filter(kv->kv.k.equalsIgnoreCase(selling.goodsNo)).findFirst().get();
+            responseVo.list.add(new GoodsSimpleVo(selling.goodsNo, "", selling.price, selling.quantity, vo1!=null?vo1.v:0, "", vo2!=null?vo2.v:0,""));
         });
         responseVo.setSuccessfulMessage("畅销款获取成功");
         return responseVo;
@@ -221,10 +245,19 @@ public class ApiServiceImpl implements ApiService {
             responseVo.setMsg("货号/条码不存在");
             return responseVo;
         }
+        List<String> goodsNoList = erpService.getAllGoodsNoInSameStyle(goodsNo);
+        String sibling = "";
+        for(String no : goodsNoList) {
+            if(sibling.isEmpty())
+                sibling = sibling + no;
+            else
+                sibling = sibling + "|" + no;
+        }
         responseVo.goodsNo = goodsNo;
         responseVo.goodsName = goods.goodsName;
         responseVo.price = goods.price;
-        responseVo.hasSibling = erpService.getAllGoodsNoInSameStyle(goodsNo).size() > 1;
+        responseVo.sibling = sibling;
+        responseVo.hasSibling = goodsNoList.size() > 1;
 
         erpService.getSelling(dimension, goodsNo, includeSameStyle).forEach(x->{
             SellingVo.DetailBean detailBean = new SellingVo.DetailBean(x.storeCode, x.quantity);

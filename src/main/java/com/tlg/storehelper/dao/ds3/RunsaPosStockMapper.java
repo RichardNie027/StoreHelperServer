@@ -1,14 +1,12 @@
 package com.tlg.storehelper.dao.ds3;
 
 import com.tlg.storehelper.entity.ds3.RunsaPosStock;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Options;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 import java.util.Map;
 
+@CacheNamespace(readWrite = false, flushInterval = 60000)
 public interface RunsaPosStockMapper {
 
     String TABLE = "OA.dbo.RunsaPosStock";

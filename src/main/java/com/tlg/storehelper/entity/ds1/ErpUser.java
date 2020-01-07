@@ -1,6 +1,8 @@
 package com.tlg.storehelper.entity.ds1;
 
-public class ErpUser {
+import java.io.Serializable;
+
+public class ErpUser implements Serializable {
 
     public String userId;
     public String userAccount;

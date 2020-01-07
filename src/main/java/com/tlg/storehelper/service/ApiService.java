@@ -44,7 +44,7 @@ public interface ApiService {
     /////////////////////////////////////////////////////////////
     ///////////////////    Selling    ///////////////////////
     /////////////////////////////////////////////////////////////
-    SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCodes, String dimension, String salesCode, int floorNumber, int page, int pageSize);
+    SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCodes, String dimension, String salesCode, int floorNumber, String sort, int page, int pageSize);
     SimplePageListResponseVo<SalesSelling> getBestSalesSelling(String storeCodes, String dimension, int page, int pageSize);
 
     /////////////////////////////////////////////////////////////

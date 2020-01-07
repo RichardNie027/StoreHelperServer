@@ -1,6 +1,8 @@
 package com.tlg.storehelper.entity.ds2;
 
-public class InventoryDetail {
+import java.io.Serializable;
+
+public class InventoryDetail implements Serializable {
     public String id;
     public String pid;
     public int idx;

@@ -1,8 +1,9 @@
 package com.tlg.storehelper.entity.ds2;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Inventory {
+public class Inventory implements Serializable {
     public String id;
     public String storeCode;
     public Date listDate;

@@ -1,5 +1,6 @@
 package com.tlg.storehelper.dao.ds1;
 
+import org.apache.ibatis.annotations.CacheNamespace;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.List;
 /**
  * 商品条码
  */
+@CacheNamespace(readWrite = false, flushInterval = 600000)
 public interface GoodsBarcodeMapper {
 
     /** 已废除，改用selectAllSimpleGoodsBarcodes */

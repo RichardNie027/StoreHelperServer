@@ -12,6 +12,8 @@ public class SellingVo extends BaseResponseVo {
     public String goodsName;
     /**吊牌价*/
     public int price;
+    /**同款货号s*/
+    public String sibling;
     /**包含同款*/
     public boolean hasSibling;
 

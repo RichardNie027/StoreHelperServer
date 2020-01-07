@@ -1,6 +1,8 @@
 package com.tlg.storehelper.entity.ds1;
 
-public class Goods {
+import java.io.Serializable;
+
+public class Goods implements Serializable {
 
     /**商品货号*/
     public String goodsNo;
@@ -14,4 +16,6 @@ public class Goods {
     public String pic;
     /**吊牌价*/
     public int price;
+//    /**同款货号集合大小*/
+//    public int sameStyleCount;
 }
