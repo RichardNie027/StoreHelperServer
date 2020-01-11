@@ -73,7 +73,9 @@ jasypt:
     algorithm: PBEWithMD5AndDES
     password: tlg_it
 properties:
-  erp_service:
-    goods_pic_url: http://192.168.1.4:8080/reshelper/goods/pic/
+  api_service:
+    defalut_goods_class: DEFAULT|005303,005306,005307,005308,005309,005310,005311,005312,005313,005314
   business_service:
     brand_pic_url: http://192.168.1.4:8080/reshelper/brand/pic/
+  erp_service:
+    goods_pic_url: http://192.168.1.4:8080/reshelper/goods/pic/

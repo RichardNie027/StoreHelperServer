@@ -24,6 +24,8 @@ public interface ApiService {
     GoodsInfoResponseVo getGoodsList(String lastModDate);
     SimpleListResponseVo<GoodsPopularityVo> getGoodsPopularity(String storeCode);
     //GoodsBarcodeEntity getGoodsBarcodeList(String lastModDate);
+    SimpleListResponseVo<String> getGoodsClassList(String brandKey);
+    SimplePageListResponseVo<String> getGoodsNoListByClass(String brandCodes, String yearCode, String seasonCode, String classCode, String priceCode, int page, Integer pageSize);
 
     /////////////////////////////////////////////////////////////
     ////////////////////    Inventory    ////////////////////////
@@ -45,7 +47,7 @@ public interface ApiService {
     ///////////////////    Selling    ///////////////////////
     /////////////////////////////////////////////////////////////
     SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCodes, String dimension, String salesCode, int floorNumber, String sort, int page, int pageSize);
-    SimplePageListResponseVo<SalesSelling> getBestSalesSelling(String storeCodes, String dimension, int page, int pageSize);
+    SimplePageListResponseVo<SalesSelling> getBestSalesSelling(String storeCodes, String dimension, String sort, int page, int pageSize);
 
     /////////////////////////////////////////////////////////////
     ///////////////////   StoreSelling    ///////////////////////

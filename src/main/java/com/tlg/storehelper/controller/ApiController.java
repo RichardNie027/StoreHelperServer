@@ -76,6 +76,16 @@ public class ApiController {
         return apiService.getGoodsPopularity(storeCode);
     }
 
+    @RequestMapping("/api/getGoodsClassList")
+    public SimpleListResponseVo<String> getGoodsClassList(String brandKey){
+        return apiService.getGoodsClassList(brandKey);
+    }
+
+    @RequestMapping("/api/getGoodsNoListByClass")
+    public SimplePageListResponseVo<String> getGoodsNoListByClass(String brandCodes, String yearCode, String seasonCode, String classCode, String priceCode, int page, Integer pageSize){
+        return apiService.getGoodsNoListByClass(brandCodes, yearCode, seasonCode, classCode, priceCode, page, pageSize);
+    }
+
     @RequestMapping(value = "/api/uploadInventory", method = RequestMethod.POST)
     public BaseResponseVo uploadInventory(@RequestBody InventoryEntity inventoryEntity){
         return apiService.uploadInventory(inventoryEntity);
@@ -104,8 +114,8 @@ public class ApiController {
     }
 
     @RequestMapping("/api/getBestSalesSelling")
-    public SimplePageListResponseVo<SalesSelling> getBestSalesSelling(String storeCodes, String dim, int page, Integer pageSize){
-        return apiService.getBestSalesSelling(storeCodes, dim, page, pageSize==null||pageSize<10 ? 10:pageSize);
+    public SimplePageListResponseVo<SalesSelling> getBestSalesSelling(String storeCodes, String dim, String sort, int page, Integer pageSize){
+        return apiService.getBestSalesSelling(storeCodes, dim, sort, page, pageSize==null||pageSize<10 ? 10:pageSize);
     }
 
     @RequestMapping("/api/getSelling")

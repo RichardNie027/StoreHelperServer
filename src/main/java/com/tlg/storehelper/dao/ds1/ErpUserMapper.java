@@ -20,7 +20,7 @@ public interface ErpUserMapper {
             " <if test='storeLike!=null and storeLike!=\"\"'>"+
             "  and substring(dbno,2,3) like #{storeLike} "+
             " </if>"+
-            " <if test='storeCodes!=null and storeCodes.size &gt; 0'>"+
+            " <if test='storeCodes!=null and storeCodes.size>0'>"+
             "  and substring(dbno,2,3) in " +
             "<foreach item='item' index='index' collection='storeCodes' open='(' separator=',' close=')'> " +
             " #{item}"+

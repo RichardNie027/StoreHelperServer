@@ -8,9 +8,11 @@ import com.tlg.storehelper.service.ApiService;
 import com.tlg.storehelper.service.BusinessService;
 import com.tlg.storehelper.service.ErpService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +23,8 @@ public class ApiServiceImpl implements ApiService {
     private ErpService erpService;
     @Autowired
     private BusinessService businessService;
+    @Value("${properties.api_service.defalut_goods_class}")
+    private String DefaultGoodsClass;
 
     @Override
     public SimpleListMapResponseVo<String> loginValidation(String username, String password) {
@@ -131,6 +135,25 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
+    public SimpleListResponseVo<String> getGoodsClassList(String brandKey) {
+        SimpleListResponseVo<String> responseVo = new SimpleListResponseVo<String>();
+        responseVo.list = erpService.getGoodsClassList(brandKey);
+        responseVo.list.add(DefaultGoodsClass); //预设分类默认，DEFAULT|005303,005306,005307
+        responseVo.setSuccessfulMessage("商品分类获取成功");
+        return responseVo;
+    }
+
+    @Override
+    public SimplePageListResponseVo<String> getGoodsNoListByClass(String brandCodes, String yearCode, String seasonCode, String classCode, String priceCode, int page, Integer pageSize) {
+        List<String> resultList = new ArrayList<>();
+        int recordCount = erpService.getGoodsNoListByClass(resultList,brandCodes, yearCode, seasonCode, classCode, priceCode, pageSize, page);
+        SimplePageListResponseVo<String> responseVo = new SimplePageListResponseVo<String>(page, (int)Math.ceil((double)recordCount/pageSize), pageSize, recordCount);
+        responseVo.list.addAll(resultList);
+        responseVo.setSuccessfulMessage("商品编号集合获取成功");
+        return responseVo;
+    }
+
+    @Override
     public BaseResponseVo uploadInventory(InventoryEntity inventoryEntity) {
         String result = businessService.uploadInventory(inventoryEntity);
         BaseResponseVo responseVo = new BaseResponseVo();
@@ -200,9 +223,13 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public SimplePageListResponseVo<GoodsSimpleVo> getBestSelling(String storeCodes, String dimension, String salesCode, int floorNumber, String sort, int page, int pageSize) {
-        int recordCount = erpService.getBestSellingCount(storeCodes, dimension, salesCode, floorNumber);
+        List<Selling> list = new ArrayList<>();
+        int recordCount = erpService.getBestSelling(list, storeCodes, dimension, salesCode, floorNumber, sort, pageSize, page);
         SimplePageListResponseVo<GoodsSimpleVo> responseVo = new SimplePageListResponseVo<GoodsSimpleVo>(page, (int)Math.ceil((double)recordCount/pageSize), pageSize, recordCount);
-        List<Selling> list = erpService.getBestSelling(storeCodes, dimension, salesCode, floorNumber, sort, pageSize, page);
+        if(list == null) {
+            responseVo.setCodeAndMessage(404, "内部错误");
+            return responseVo;
+        }
         List<String> goodsNoList = new ArrayList<>();
         list.forEach(selling -> {
             goodsNoList.add(selling.goodsNo);
@@ -227,10 +254,10 @@ public class ApiServiceImpl implements ApiService {
     }
 
     @Override
-    public SimplePageListResponseVo<SalesSelling> getBestSalesSelling(String storeCodes, String dimension, int page, int pageSize) {
-        int recordCount = erpService.getBestSalesSellingCount(storeCodes, dimension);
+    public SimplePageListResponseVo<SalesSelling> getBestSalesSelling(String storeCodes, String dimension, String sort, int page, int pageSize) {
+        List<SalesSelling> list = new ArrayList<>();
+        int recordCount = erpService.getBestSalesSelling(list, storeCodes, dimension, sort, pageSize, page);
         SimplePageListResponseVo<SalesSelling> responseVo = new SimplePageListResponseVo<>(page, (int)Math.ceil((double)recordCount/pageSize), pageSize, recordCount);
-        List<SalesSelling> list = erpService.getBestSalesSelling(storeCodes, dimension, pageSize, page);
         responseVo.list.addAll(list);
         responseVo.setSuccessfulMessage("导购销售排名获取成功");
         return responseVo;
@@ -310,9 +337,9 @@ public class ApiServiceImpl implements ApiService {
 
     @Override
     public SimplePageListResponseVo<ShopHistoryVo> getMembershipShopHistory(String membershipId, String storeCode, int page) {
-        int recordCount = erpService.getShopHistoryCount(membershipId);
+        List<ShopHistoryVo> list = new ArrayList<>();
         int pageSize = 10;
-        List<ShopHistoryVo> list = erpService.getShopHistory(membershipId, pageSize, page);
+        int recordCount = erpService.getShopHistory(list, membershipId, pageSize, page);
         SimplePageListResponseVo<ShopHistoryVo> responseVo = new SimplePageListResponseVo<ShopHistoryVo>(page, (int)Math.ceil((double)recordCount/pageSize), pageSize, recordCount);
         responseVo.list.addAll(list);
         responseVo.setSuccessfulMessage("会员信息获取成功");

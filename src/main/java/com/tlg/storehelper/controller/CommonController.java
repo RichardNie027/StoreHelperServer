@@ -74,7 +74,7 @@ public class CommonController {
         if(erpService.queryGoodsPicture(goodsNo)) {
             RedisUtil redisUtil = RedisUtil.getInstance(redisTemplate);
             String picStream = (String)redisUtil.get(goodsNo);
-            if(picStream.isEmpty()) {
+            if(picStream==null || picStream.isEmpty()) {
                 response.setStatus(1007);
                 response.setHeader("msg", "No Pic");
             }

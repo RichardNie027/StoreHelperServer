@@ -6,6 +6,7 @@ import com.tlg.storehelper.entity.ds3.RunsaPosTransfer;
 import com.tlg.storehelper.entity.ds1.StoreSelling;
 import com.tlg.storehelper.pojo.*;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public interface ErpService {
@@ -37,6 +38,12 @@ public interface ErpService {
     /**返回商品热度*/
     List<GoodsPopularityVo> getGoodsPopularity(String storeCode);
 
+    /**商品类别 类别码|类别名*/
+    List<String> getGoodsClassList(String brandKey);
+
+    /**按类别搜索商品*/
+    int getGoodsNoListByClass(List<String> result, String brandCodes, String yearCode, String seasonCode, String classCode, String priceCode, int pageSize, int page);
+
     /**货号的推荐款*/
     List<Selling> getCollocation(String goodsNo, String storeCodes, String dimension);
 
@@ -48,25 +55,16 @@ public interface ErpService {
      * @param salesCode 导购工号，可null
      * @return 总记录数
      */
-    int getPairCollocation(List<PairCollocation> result, String storeCodes, String dimension, String salesCode, int pageSize, int page);
+    int getPairCollocation(@NotNull List<PairCollocation> result, String storeCodes, String dimension, String salesCode, int pageSize, int page);
 
-    /**
-     * 畅销数量的记录数
-     * @param storeCodes 单字符=品牌首字母；逗号分隔的店编字符串=多店；null/empty=无返回
-     * @param dimension 维 WEEK/MONTH/2WEEK/2MONTH/3WEEK/3MONTH
-     * @param salesCode 导购工号，可为null/emtpy
-     * @param floorNumber 最小的销量统计
-     */
-    int getBestSellingCount(String storeCodes, String dimension, String salesCode, int floorNumber);
-
-    /**
+     /**
      * 畅销清单
      * @param storeCodes 单字符=品牌首字母；逗号分隔的店编字符串=多店；empty=无返回
      * @param dimension 维 WEEK/MONTH/2WEEK/2MONTH/3WEEK/3MONTH
      * @param salesCode 导购工号，可为null/empty
      * @param floorNumber 最小的销量统计
      */
-    List<Selling> getBestSelling(String storeCodes, String dimension, String salesCode, int floorNumber, String sort, int pageSize, int page);
+    int getBestSelling(@NotNull List<Selling> result, String storeCodes, String dimension, String salesCode, int floorNumber, String sort, int pageSize, int page);
 
     /**
      * 导购列表
@@ -76,14 +74,6 @@ public interface ErpService {
     List<String> getSalesList(String storeCode);
 
     /**
-     * 导购销售排名的记录数
-     * @param storeCodes
-     * @param dimension
-     * @return
-     */
-    int getBestSalesSellingCount(String storeCodes, String dimension);
-
-    /**
      * 导购销售排名
      * @param storeCodes
      * @param dimension
@@ -91,7 +81,7 @@ public interface ErpService {
      * @param page
      * @return
      */
-    List<SalesSelling> getBestSalesSelling(String storeCodes, String dimension, int pageSize, int page);
+    int getBestSalesSelling(@NotNull List<SalesSelling> result, String storeCodes, String dimension, String sort, int pageSize, int page);
 
     /**返回每个货号的总库存*/
     List<KV<String,Integer>> getTotalStock(List<String> goodsNoList, boolean includeSameStyle);
@@ -102,11 +92,8 @@ public interface ErpService {
     /**会员信息*/
     List<MembershipVo> getMembership(String membershipId);
 
-    /**会员消费记录的记录数*/
-    int getShopHistoryCount(String membershipId);
-
     /**会员消费记录*/
-    List<ShopHistoryVo> getShopHistory(String membershipId,  int pageSize, int page);
+    int getShopHistory(List<ShopHistoryVo> result, String membershipCardId, int pageSize, int page);
 
     /**保存浪沙Pos数据*/
     void saveRunsaPosData(ApiController.RunsaPosDataBean posDataBean);

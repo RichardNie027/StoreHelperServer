@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.nec.lib.utils.BeanUtil;
 import com.nec.lib.utils.DateUtil;
 import com.nec.lib.utils.NetUtil;
+import com.nec.lib.utils.StringUtil;
 import com.tlg.storehelper.controller.ApiController;
 import com.tlg.storehelper.dao.ds1.*;
 import com.tlg.storehelper.dao.ds2.SimpleMapper;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -56,8 +58,33 @@ public class ErpServiceImpl implements ErpService {
     @Value("${properties.erp_service.goods_pic_url}")
     private String ResourceUrl;
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //私有工具函数
+
+//    /**逗号分隔的字符串，转in('','')*/
+//    private String delimiterStringToInClause(String source) {
+//        String codes = "";
+//        String sql = " in (";
+//        for(String item: source.split(",")) {
+//            if (!codes.equals("")) {
+//                codes = codes + ",";
+//            }
+//            codes = codes + "'" + item + "'";
+//        }
+//        return sql + codes + ") ";
+//    }
+//    /**逗号分隔的店编字符串，转为"长度为0"的List*/
+//    private  List<String> delimiterStringToList(String storeCodes) {
+//        List storeList = new ArrayList();
+//        if (storeCodes != null && storeCodes.length() > 1) {
+//            for (String item : storeCodes.split(","))
+//                storeList.add(item);
+//        }
+//        return storeList;
+//    }
+
     /**逗号分隔的店编字符串，转in('','') 或 like 'x__'*/
-    private String delimiterStringToSQL(String storeCodes) {
+    private String delimiterStoreCodesToSQL(String storeCodes) {
         String sql = "";
         if(storeCodes.length() == 1)
             sql = " like '" + storeCodes + "__' ";
@@ -72,16 +99,6 @@ public class ErpServiceImpl implements ErpService {
             sql = sql + codes + ") ";
         }
         return sql;
-    }
-
-    /**逗号分隔的店编字符串，转为"长度为0"的List*/
-    private  List<String> delimiterStringToList(String storeCodes) {
-        List storeList = new ArrayList();
-        if (storeCodes != null && storeCodes.length() > 1) {
-            for (String item : storeCodes.split(","))
-                storeList.add(item);
-        }
-        return storeList;
     }
 
     /**默认MONTH前的日期，格式默认：yyyyMMdd*/
@@ -105,6 +122,8 @@ public class ErpServiceImpl implements ErpService {
             return DateUtil.toStr(DateUtils.addMonths(new Date(), delta), dateFormat);
         }
     }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public List<ErpUser> getStoreUsersInAuthorization(String storeCondition) {
@@ -179,6 +198,32 @@ public class ErpServiceImpl implements ErpService {
     }
 
     @Override
+    public List<String> getGoodsClassList(String brandKey) {
+        return goodsMapper.selectAllGoodsClass(brandKey);
+    }
+
+    @Override
+    public int getGoodsNoListByClass(@NotNull List<String> result, String brandCodes, String yearCodes, String seasonCodes, String classCodes, String priceCodes, int pageSize, int page) {
+        if(result == null)
+            return 0;
+        result.clear();
+        List<String> brandList = StringUtil.multiStrToList(brandCodes, ",");
+        List<String> yearList = StringUtil.multiStrToList(yearCodes, ",");
+        List<String> seasonList = StringUtil.multiStrToList(seasonCodes, ",");
+        List<String> classList = StringUtil.multiStrToList(classCodes, ",");
+        List<String> priceList = StringUtil.multiStrToList(priceCodes, ",");
+        String sql = "select a.colthno from cltypep a "+
+                (yearCodes!=null   && yearCodes.isEmpty()   ? "" : " inner join cltypep b on a.colthno=b.colthno and b.classno "+StringUtil.multiStrToSqlInClause(yearCodes,","))+
+                (seasonCodes!=null && seasonCodes.isEmpty() ? "" : " inner join cltypep c on a.colthno=c.colthno and c.classno "+StringUtil.multiStrToSqlInClause(seasonCodes,","))+
+                (classCodes!=null  && classCodes.isEmpty()  ? "" : " inner join cltypep d on a.colthno=d.colthno and d.classno "+StringUtil.multiStrToSqlInClause(classCodes,","))+
+                (priceCodes!=null  && priceCodes.isEmpty()  ? "" : " inner join cltypep e on a.colthno=e.colthno and e.classno "+StringUtil.multiStrToSqlInClause(priceCodes,","))+
+                " inner join cltypep f on a.colthno=f.colthno and substring(f.classno,1,3)='006'"+
+                " inner join coloth_t t on a.colthno=t.colthno where t.talka <> '' and substring(t.talka,1,3) <> 'pic' and a.classno " + StringUtil.multiStrToSqlInClause(brandCodes,",")+" order by f.classno,a.colthno desc";
+        result.addAll(goodsMapper.selectAllGoodsNoByClass(sql, pageSize, pageSize * page));
+        return goodsMapper.selectAllGoodsNoCountByClass(brandList, yearList, seasonList, classList, priceList);
+    }
+
+    @Override
     public List<Selling> getCollocation(String goodsNo, String storeCodes, String dimension) {
         String dateFrom = dimentionToDateStr(dimension);
         Goods goods = goodsMapper.selectGoods(goodsNo);
@@ -194,13 +239,16 @@ public class ErpServiceImpl implements ErpService {
     }
 
     @Override
-    public int getPairCollocation(List<PairCollocation> result, String storeCodes, String dimension, String salesCode, int pageSize, int page) {
-        List<String> storeList = delimiterStringToList(storeCodes);
-        String brand = storeList.size()==0 ? storeCodes : null;
+    public int getPairCollocation(@NotNull List<PairCollocation> result, String storeCodes, String dimension, String salesCode, int pageSize, int page) {
+        if(result == null)
+            return 0;
+        result.clear();
+        if(storeCodes==null || storeCodes.length()==0)
+            return 0;
+        List<String> storeList = storeCodes.length()==1 ? null : StringUtil.multiStrToList(storeCodes,",");
+        String brand = storeCodes.length()==1 ? storeCodes : null;
         List<PairCollocation> list0 = sellingMapper.selectPairCollocation(dimentionToDateStr(dimension), brand, storeList, salesCode!=null && !salesCode.isEmpty() ? salesCode : null);
         List<PairCollocation> list = list0.stream().limit(60).collect(Collectors.toList());
-        if(result == null)
-            result = new ArrayList<PairCollocation>();
         int ceilingIdx = (page+1)*pageSize > list.size() ? list.size() : (page+1)*pageSize;
         for(int i = page*pageSize; i<ceilingIdx; i++)
             result.add(list.get(i));
@@ -208,22 +256,11 @@ public class ErpServiceImpl implements ErpService {
     }
 
     @Override
-    public int getBestSellingCount(String storeCodes, String dimension, String salesCode, int floorNumber) {
-        String dateFrom = dimentionToDateStr(dimension);
-        if(storeCodes.length() == 1)
-            return sellingMapper.selectBestSellingCount(dateFrom, storeCodes, null, salesCode, floorNumber);
-        else {
-            List storeList = new ArrayList();
-            if (storeCodes != null && !storeCodes.isEmpty())
-                for (String item : storeCodes.split(","))
-                    storeList.add(item);
-            return sellingMapper.selectBestSellingCount(dateFrom, null, storeList, salesCode, floorNumber);
-        }
-    }
-
-    @Override
-    public List<Selling> getBestSelling(String storeCodes, String dimension, String salesCode, int floorNumber, String sort, int pageSize, int page) {
-        String subSQL1 = delimiterStringToSQL(storeCodes);
+    public int getBestSelling(@NotNull List<Selling> result, String storeCodes, String dimension, String salesCode, int floorNumber, String sort, int pageSize, int page) {
+        if(result == null)
+            return 0;
+        result.clear();
+        String subSQL1 = delimiterStoreCodesToSQL(storeCodes);
         String dateFrom = dimentionToDateStr(dimension);
         sort = sort==null || sort.length()==0 ? "SALES" : sort;
         if(sort.equalsIgnoreCase("PRICE"))
@@ -232,11 +269,10 @@ public class ErpServiceImpl implements ErpService {
             sort = " order by sum(nb) desc,max(b.sprice) desc";
         String sql = "select min(a.colthno) as goodsNo, max(b.sprice) as price, sum(a.nb) as quantity, sum(a.endprice*a.nb) as money from dbo.u2saleb a left join coloth_t b on a.colthno=b.colthno"+
                 "  where nos in (select distinct nos from dbo.u2sale where substring(cusno,2,3) "+subSQL1+
-                " and outdate >= '" + dateFrom + "') ";
-        if(salesCode != null && !salesCode.isEmpty())
-            sql = sql + " and a.salescode='" + salesCode + "' ";
-        sql = sql + " group by b.colthnob  having sum(nb)>=" + floorNumber + sort;
-        return sellingMapper.selectBestSelling(sql, pageSize, pageSize * page);
+                " and outdate >= '" + dateFrom + "') "+
+                (salesCode != null && !salesCode.isEmpty() ? " and a.salescode='" + salesCode + "' ":"") + " group by b.colthnob  having sum(nb)>=" + floorNumber + sort;
+        result.addAll(sellingMapper.selectBestSelling(sql, pageSize, pageSize * page));
+        return storeCodes.length() == 1 ? sellingMapper.selectBestSellingCount(dateFrom, storeCodes, null, salesCode, floorNumber) : sellingMapper.selectBestSellingCount(dateFrom, null, StringUtil.multiStrToList(storeCodes, ","), salesCode, floorNumber);
     }
 
     @Override
@@ -245,20 +281,14 @@ public class ErpServiceImpl implements ErpService {
     }
 
     @Override
-    public int getBestSalesSellingCount(String storeCodes, String dimension) {
-        String startDate = dimentionToDateStr(dimension);
-        if(storeCodes.length() == 1)
-            return sellingMapper.selectBestSalesSellingCount(startDate, storeCodes, null);
-        else {
-            List storeList = delimiterStringToList(storeCodes);
-            return sellingMapper.selectBestSalesSellingCount(startDate, null, storeList);
-        }
-    }
-
-    @Override
-    public List<SalesSelling> getBestSalesSelling(String storeCodes, String dimension, int pageSize, int page) {
-        String subSQL1 = delimiterStringToSQL(storeCodes);
+    public int getBestSalesSelling(@NotNull List<SalesSelling> result, String storeCodes, String dimension, String sort, int pageSize, int page) {
+        if(result == null)
+            return 0;
+        result.clear();
+        String subSQL1 = delimiterStoreCodesToSQL(storeCodes);
         String dateFrom = dimentionToDateStr(dimension);
+        //PDM天销额(default)、PCC客单件、PCT客单价、CS件数、BS单数
+        sort = sort.equals("PCC")?"1.0*sum(b.nb)/count(distinct b.nos) desc":sort.equals("PCT")?"1.0*sum(b.endprice*b.nb)/count(distinct b.nos) desc":sort.equals("CS")?"sum(b.nb) desc":sort.equals("BS")?"count(distinct b.nos) desc":"1.0*sum(b.endprice*b.nb)/max(sch.days) desc";
         String sql = "select b.salescode as salesCode,s.names as salesName,substring(a.cusno,2,3) as storeCode,db.class2 as storeLevel,count(distinct b.nos) as transactions,sum(b.nb) as quantity,sum(b.endprice*b.nb) as money,max(sch.days) as days"+
                 " from dbo.u2saleb b left join dbo.u2sale a on b.nos=a.nos"+
                 " left join zg_sales s on b.salescode=s.codes"+
@@ -266,8 +296,9 @@ public class ErpServiceImpl implements ErpService {
                 " left join (select dbno,empid,count(0) as days from KQ_Schedule where substring(dbno,2,3) "+subSQL1+" and eday >= '"+dateFrom+"' and eday < current_date() group by dbno,empid) sch on a.cusno=sch.dbno and b.salescode=sch.empid"+
                 "  where substring(a.cusno,2,3) "+subSQL1+
                 " and a.outdate >= '" + dateFrom + "'"+
-                " group by b.salescode,a.cusno,s.names,db.class2 having sum(b.nb)>0 and max(sch.days) > 0 order by sum(b.endprice*b.nb)/max(sch.days) desc";
-        return sellingMapper.selectBestSalesSelling(sql, pageSize, pageSize * page);
+                " group by b.salescode,a.cusno,s.names,db.class2 having sum(b.nb)>0 and max(sch.days) > 0 order by " + sort;
+        result.addAll(sellingMapper.selectBestSalesSelling(sql, pageSize, pageSize * page));
+        return storeCodes.length() == 1 ? sellingMapper.selectBestSalesSellingCount(dateFrom, storeCodes, null) : sellingMapper.selectBestSalesSellingCount(dateFrom, null, StringUtil.multiStrToList(storeCodes,","));
     }
 
     @Override
@@ -305,13 +336,11 @@ public class ErpServiceImpl implements ErpService {
     }
 
     @Override
-    public int getShopHistoryCount(String membershipCardId) {
-        return shopHistoryMapper.selectShopHistoryCount(membershipCardId);
-    }
-
-    @Override
-    public List<ShopHistoryVo> getShopHistory(String membershipCardId, int pageSize, int page) {
-        List<ShopHistoryVo> result = shopHistoryMapper.selectShopHistory("SELECT nos as listNo, outdate as shopDate, nos as salesListCode, nb as quantity, now_real as amount FROM dbo.u2sale WHERE codes='"+membershipCardId+"' ORDER BY outdate desc", page*pageSize, pageSize);
+    public int getShopHistory(List<ShopHistoryVo> result, String membershipCardId, int pageSize, int page) {
+        if(result == null)
+            return 0;
+        result.clear();
+        result.addAll(shopHistoryMapper.selectShopHistory("SELECT nos as listNo, outdate as shopDate, nos as salesListCode, nb as quantity, now_real as amount FROM dbo.u2sale WHERE codes='"+membershipCardId+"' ORDER BY outdate desc", page*pageSize, pageSize));
         List<String> list = new ArrayList<>();
         list.add("");
         result.stream().forEach(x->list.add(x.listNo));
@@ -319,7 +348,7 @@ public class ErpServiceImpl implements ErpService {
         result.stream().forEach(y->{
             y.shopHistoryItemList.addAll(itemList.stream().filter(z->z.listNo.equals(y.listNo)).collect(Collectors.toList()));
         });
-        return  result;
+        return  shopHistoryMapper.selectShopHistoryCount(membershipCardId);
     }
 
     @Override
