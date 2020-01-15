@@ -68,6 +68,14 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+  thymeleaf:
+    cache: false
+    check-template-location: true
+    encoding: UTF-8
+    mode: HTML5
+    prefix: classpath:/templates/
+    servlet:
+      content-type: text/html
 jasypt:
   encryptor:
     algorithm: PBEWithMD5AndDES

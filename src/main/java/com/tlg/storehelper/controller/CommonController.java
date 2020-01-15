@@ -16,7 +16,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 
-@RestController
+@RestController     /* @Controller + @ResponseBody*/
 public class CommonController {
 
     public static String sApkPath = "D:/AndroidStudioProjects/APKs/StoreHelper/release/";
