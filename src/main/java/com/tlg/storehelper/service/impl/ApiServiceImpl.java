@@ -134,11 +134,12 @@ public class ApiServiceImpl implements ApiService {
         return responseVo;
     }
 
+    /**品牌首字关联的所有品牌类别、年份、季节、大类、价格带*/
     @Override
     public SimpleListResponseVo<String> getGoodsClassList(String brandKey) {
         SimpleListResponseVo<String> responseVo = new SimpleListResponseVo<String>();
         responseVo.list = erpService.getGoodsClassList(brandKey);
-        responseVo.list.add(DefaultGoodsClass); //预设分类默认，DEFAULT|005303,005306,005307
+        responseVo.list.add(DefaultGoodsClass); //预设分类默认(DEFAULT作为与季节等分类并列的类别)，DEFAULT|005303,005306,005307
         responseVo.setSuccessfulMessage("商品分类获取成功");
         return responseVo;
     }

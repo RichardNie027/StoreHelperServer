@@ -54,6 +54,7 @@ public class CommonController {
         return baseResponseVo;
     }
 
+    /**Android客户端的版本*/
     @RequestMapping(value = "/pre_api/appVersion")
     private SimpleMapResponseVo storeHelperAppLastestVersion(HttpServletResponse response) {
         return commonService.getVersion(response, sApkPath);
@@ -69,6 +70,7 @@ public class CommonController {
         }
     }
 
+    /**商品图片*/
     @RequestMapping(value = "/pre_api/pic/{goodsNo}", method= RequestMethod.GET)
     private void downloadPic(HttpServletResponse response, @PathVariable String goodsNo) {
         if(erpService.queryGoodsPicture(goodsNo)) {

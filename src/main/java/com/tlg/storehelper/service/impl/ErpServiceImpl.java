@@ -197,6 +197,7 @@ public class ErpServiceImpl implements ErpService {
         return goodsPopularityMapper.selectPopularities("%"+storeCode.substring(0,1)+"%");
     }
 
+    /**品牌首字关联的所有品牌类别、年份、季节、大类、价格带*/
     @Override
     public List<String> getGoodsClassList(String brandKey) {
         return goodsMapper.selectAllGoodsClass(brandKey);

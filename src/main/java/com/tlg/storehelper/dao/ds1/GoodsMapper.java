@@ -50,7 +50,7 @@ public interface GoodsMapper {
             "</script>")
     List<KV<String,Integer>> selectGoodsNumberInSameStyle(List<String> goodsNos);
 
-    /**商品类别 类别码|类别名*/
+    /**商品类别，品牌首字关联的所有品牌类别、年份、季节、大类、价格带，形如：类别码|类别名*/
     @Select("select classno+'|'+classname from cltypeb where (typeno='001' and bz like '%'+#{brandKey}+'%') or (typeno='002' and classname>=convert(char(4),datepart(yy,dateadd(month, -10, getdate())))) or typeno='003' or typeno='005' or typeno='008' order by classno")
     List<String> selectAllGoodsClass(String brandKey);
 

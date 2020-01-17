@@ -23,9 +23,10 @@ public interface SimpleMapper {
     @Update("UPDATE [StoreHelper].[dbo].[DynamicPwd] SET ip=#{ip} WHERE storeCode=#{storeCode}")
     int updateStoreDynamicPwd_Ip(String ip, String storeCode);
 
-    @Select("SELECT html FROM [StoreHelper].[dbo].[H5Content] WHERE brandKey=#{brandKey} and type=#{type}")
-    String selectHtml(String brandKey, String type);
+//    @Select("SELECT html FROM [StoreHelper].[dbo].[H5Content] WHERE brandKey=#{brandKey} and type=#{type}")
+//    String selectHtml(String brandKey, String type);
+//
+//    @Select("SELECT type+'|'+convert(varchar,picVer)+'|'+pics FROM [StoreHelper].[dbo].[H5Content] WHERE brandKey=#{brandKey} ORDER BY type")
+//    List<String> selectBrandPics(String brandKey);
 
-    @Select("SELECT type+'|'+convert(varchar,picVer)+'|'+pics FROM [StoreHelper].[dbo].[H5Content] WHERE brandKey=#{brandKey} ORDER BY type")
-    List<String> selectBrandPics(String brandKey);
 }

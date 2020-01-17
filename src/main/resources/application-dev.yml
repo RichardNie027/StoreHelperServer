@@ -85,5 +85,6 @@ properties:
     defalut_goods_class: DEFAULT|005303,005306,005307,005308,005309,005310,005311,005312,005313,005314
   business_service:
     brand_pic_url: http://192.168.1.176:8081/reshelper/brand/pic/
+    brand_pic_names_url: http://192.168.1.176:8081/reshelper/brand/picNames/
   erp_service:
     goods_pic_url: http://192.168.1.176:8081/reshelper/goods/pic/
