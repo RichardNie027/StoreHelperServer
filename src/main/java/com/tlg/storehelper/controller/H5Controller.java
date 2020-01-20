@@ -38,8 +38,13 @@ public class H5Controller {
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
 
-    @RequestMapping(value = "/h5/brand/picNames", method = RequestMethod.GET)
-    private @ResponseBody SimpleMapResponseVo brandPicNames(String brandKey){
+    /**
+     * 获取品牌图片资源名称结构 + 当前品牌店铺数
+     * @param brandKey
+     * @return
+     */
+    @RequestMapping(value = "/h5/brand/resNames", method = RequestMethod.GET)
+    private @ResponseBody SimpleMapResponseVo brandPicResNames(String brandKey){
         SimpleMapResponseVo vo = new SimpleMapResponseVo();
         if(brandKey == null)
             vo.setCodeAndMessage(500, "参数缺失");
