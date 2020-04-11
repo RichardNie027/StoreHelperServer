@@ -64,7 +64,7 @@ public class ApiServiceImpl implements ApiService {
             }
         }
         if(user != null && user.password.equals(password)) {
-            if(storeCondition.isEmpty()) {
+            if(storeCondition.isEmpty() && username.length() == 6) {
                 responseVo.code = 1005;
                 responseVo.msg = "用户无授权门店";
                 return responseVo;
